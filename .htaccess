@@ -1,0 +1,13 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # 1. Nếu là file thật (như style.css, script.js) thì để yên
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+
+    # 2. Giữ nguyên các thư mục tài nguyên để load được ảnh/css
+    RewriteRule ^(css|js|images|uploads|fonts|admin/assets|admin/upload|admin/property|admin/user) - [L]
+
+    # 3. Mọi yêu cầu khác (bao gồm cả thư mục /admin) đều đưa vào public để nhân MVC xử lý
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>

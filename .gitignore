@@ -1,0 +1,37 @@
+# Environment files
+.env
+chatbot-service/.env
+
+# Python virtual environments
+.venv/
+chatbot-service/.venv/
+
+# Python cache and test artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+chatbot-service/.pytest_cache/
+
+# IDE and editor state
+.idea/
+.vscode/
+.cursor/
+
+# Local cookies and session data
+agent_cookies.txt
+cookies.txt
+
+# Large installer / archive files
+*.msi
+*.exe
+*.zip
+*.7z
+*.rar
+*.iso
+
+# OS-specific noise
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

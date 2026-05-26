@@ -1,0 +1,200 @@
+<?php
+
+class ChatbotController extends Controller
+{
+    private function jsonResponse(int $httpCode, array $payload): void
+    {
+        http_response_code($httpCode);
+        header('Content-Type: application/json; charset=utf-8');
+        header('X-Content-Type-Options: nosniff');
+        echo json_encode($payload, JSON_UNESCAPED_UNICODE);
+    }
+
+    private function proxyToFastApi(string $path, string $method, ?string $jsonBody = null): void
+    {
+        $base = rtrim(CHATBOT_SERVICE_URL, '/');
+        $url = $base . $path;
+
+        $headers = [];
+        if ($method === 'POST') {
+            $headers[] = 'Content-Type: application/json; charset=utf-8';
+        }
+        if (CHATBOT_INTERNAL_SECRET !== '') {
+            $headers[] = 'X-Internal-Secret: ' . CHATBOT_INTERNAL_SECRET;
+        }
+
+        $ch = curl_init($url);
+        $opts = [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 90,
+            CURLOPT_HTTPHEADER => $headers,
+        ];
+        if ($method === 'POST') {
+            $opts[CURLOPT_POST] = true;
+            $opts[CURLOPT_POSTFIELDS] = $jsonBody ?? '{}';
+        } else {
+            $opts[CURLOPT_HTTPGET] = true;
+        }
+        curl_setopt_array($ch, $opts);
+
+        $res = curl_exec($ch);
+        $err = curl_error($ch);
+        $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($res === false) {
+            $this->jsonResponse(503, [
+                'reply_text' => 'Không kết nối được dịch vụ chatbot. Hãy chạy FastAPI (xem chatbot-service/README.md) và kiểm tra CHATBOT_SERVICE_URL.',
+                'intent' => 'unknown',
+                'filters' => ['stype' => 'rent'],
+                'missing_slots' => [],
+                'follow_up_questions' => [],
+                'result_count' => 0,
+                'fallback_level' => 0,
+                'fallback_note' => $err ?: null,
+                'properties' => [],
+                'session_id' => '',
+            ]);
+            return;
+        }
+
+        http_response_code($code > 0 ? $code : 200);
+        header('Content-Type: application/json; charset=utf-8');
+        header('X-Content-Type-Options: nosniff');
+        echo $res;
+    }
+
+    public function message(): void
+    {
+        if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+            $this->jsonResponse(405, ['error' => 'Method not allowed']);
+            return;
+        }
+
+        $raw = file_get_contents('php://input');
+        $body = json_decode((string) $raw, true);
+        if (!is_array($body)) {
+            $this->jsonResponse(400, ['error' => 'Invalid JSON body']);
+            return;
+        }
+
+        $sessionId = isset($body['session_id']) ? trim((string) $body['session_id']) : '';
+        $text = isset($body['user_text']) ? trim((string) $body['user_text']) : '';
+        if ($sessionId === '' || $text === '') {
+            $this->jsonResponse(400, ['error' => 'session_id và user_text là bắt buộc']);
+            return;
+        }
+
+        $uid = isset($_SESSION['uid']) ? (int) $_SESSION['uid'] : null;
+        $payload = [
+            'session_id' => $sessionId,
+            'user_text' => $text,
+            'user_id' => $uid > 0 ? $uid : null,
+            'locale' => isset($body['locale']) ? (string) $body['locale'] : 'vi-VN',
+        ];
+
+        $this->proxyToFastApi('/v1/chat/message', 'POST', json_encode($payload, JSON_UNESCAPED_UNICODE));
+    }
+
+    public function reset(): void
+    {
+        if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+            $this->jsonResponse(405, ['error' => 'Method not allowed']);
+            return;
+        }
+
+        $raw = file_get_contents('php://input');
+        $body = json_decode((string) $raw, true);
+        if (!is_array($body)) {
+            $this->jsonResponse(400, ['error' => 'Invalid JSON body']);
+            return;
+        }
+
+        $sessionId = isset($body['session_id']) ? trim((string) $body['session_id']) : '';
+        if ($sessionId === '') {
+            $this->jsonResponse(400, ['error' => 'session_id là bắt buộc']);
+            return;
+        }
+
+        $uid = isset($_SESSION['uid']) ? (int) $_SESSION['uid'] : null;
+        $payload = [
+            'session_id' => $sessionId,
+            'user_id' => $uid > 0 ? $uid : null,
+        ];
+
+        $this->proxyToFastApi('/v1/chat/reset', 'POST', json_encode($payload, JSON_UNESCAPED_UNICODE));
+    }
+
+    public function suggestions(): void
+    {
+        if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'GET') {
+            $this->jsonResponse(405, ['error' => 'Method not allowed']);
+            return;
+        }
+
+        $sessionId = isset($_GET['session_id']) ? trim((string) $_GET['session_id']) : '';
+        if ($sessionId === '') {
+            $this->jsonResponse(400, ['error' => 'session_id là bắt buộc']);
+            return;
+        }
+
+        $uid = isset($_SESSION['uid']) ? (int) $_SESSION['uid'] : null;
+        $q = http_build_query([
+            'session_id' => $sessionId,
+            'user_id' => $uid > 0 ? $uid : null,
+        ]);
+
+        $this->proxyToFastApi('/v1/chat/suggestions?' . $q, 'GET', null);
+    }
+
+    public function recommendations(): void
+    {
+        if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'GET') {
+            $this->jsonResponse(405, ['error' => 'Method not allowed']);
+            return;
+        }
+
+        $uid = isset($_SESSION['uid']) ? (int) $_SESSION['uid'] : null;
+        $limit = isset($_GET['limit']) ? max(1, min(30, (int) $_GET['limit'])) : 8;
+        $q = http_build_query([
+            'user_id' => $uid > 0 ? $uid : null,
+            'limit' => $limit,
+        ]);
+
+        $this->proxyToFastApi('/v1/recommendations?' . $q, 'GET', null);
+    }
+
+    public function event(): void
+    {
+        if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+            $this->jsonResponse(405, ['error' => 'Method not allowed']);
+            return;
+        }
+
+        $raw = file_get_contents('php://input');
+        $body = json_decode((string) $raw, true);
+        if (!is_array($body)) {
+            $this->jsonResponse(400, ['error' => 'Invalid JSON body']);
+            return;
+        }
+
+        $eventType = isset($body['event_type']) ? trim((string) $body['event_type']) : '';
+        $propertyId = isset($body['property_id']) ? (int) $body['property_id'] : 0;
+        if ($eventType === '' || $propertyId <= 0) {
+            $this->jsonResponse(400, ['error' => 'event_type và property_id là bắt buộc']);
+            return;
+        }
+
+        $uid = isset($_SESSION['uid']) ? (int) $_SESSION['uid'] : null;
+        $payload = [
+            'event_type' => $eventType,
+            'property_id' => $propertyId,
+            'session_id' => isset($body['session_id']) ? trim((string) $body['session_id']) : null,
+            'user_id' => $uid > 0 ? $uid : null,
+            'source' => isset($body['source']) ? trim((string) $body['source']) : 'chatbot',
+            'metadata' => isset($body['metadata']) && is_array($body['metadata']) ? $body['metadata'] : [],
+        ];
+
+        $this->proxyToFastApi('/v1/events', 'POST', json_encode($payload, JSON_UNESCAPED_UNICODE));
+    }
+}
