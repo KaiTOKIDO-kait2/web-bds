@@ -1,0 +1,59 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    ports:
+      - "8080:80"
+    environment:
+      MYSQL_HOST: db
+      MYSQL_PORT: 3306
+      MYSQL_USER: ${MYSQL_USER:-realestate}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-realestate123}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-realestatephp_new}
+      CHATBOT_SERVICE_URL: http://chatbot:8000
+      CHATBOT_INTERNAL_SECRET: ${CHATBOT_INTERNAL_SECRET:-change-me}
+    volumes:
+      - ./:/var/www/html/Real-Estate-website-in-PHP-main
+    depends_on:
+      - db
+      - chatbot
+
+  chatbot:
+    build:
+      context: ./chatbot-service
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      MYSQL_HOST: db
+      MYSQL_PORT: 3306
+      MYSQL_USER: ${MYSQL_USER:-realestate}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-realestate123}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-realestatephp_new}
+      PUBLIC_BASE_PATH: /Real-Estate-website-in-PHP-main
+      INTERNAL_SECRET: ${CHATBOT_INTERNAL_SECRET:-change-me}
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      EMBEDDING_ENABLED: ${EMBEDDING_ENABLED:-true}
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-realestatephp_new}
+      MYSQL_USER: ${MYSQL_USER:-realestate}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-realestate123}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./DATABASE FILE/realestatephp_new.sql:/docker-entrypoint-initdb.d/01-realestatephp_new.sql:ro
+      - ./chatbot-service/ai_schema.sql:/docker-entrypoint-initdb.d/02-ai-schema.sql:ro
+
+volumes:
+  mysql_data:
