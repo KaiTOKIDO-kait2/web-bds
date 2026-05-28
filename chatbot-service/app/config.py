@@ -86,7 +86,7 @@ def get_settings() -> Settings:
         max_last_pids=_env_int("MAX_LAST_PIDS", 50),
         max_ranking_candidates=_env_int("MAX_RANKING_CANDIDATES", 80),
         recommendation_return=_env_int("RECOMMENDATION_RETURN", 8),
-        embedding_enabled=_env_bool("EMBEDDING_ENABLED", True),
+        embedding_enabled=_env_bool("EMBEDDING_ENABLED", False),
         embedding_model=_env_str("EMBEDDING_MODEL", "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"),
         embedding_threshold=_env_float("EMBEDDING_THRESHOLD", 0.55),
     )

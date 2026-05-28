@@ -83,4 +83,4 @@ docker compose up -d --build
 - `chatbot-service` chạy sau proxy PHP, không cần cài Python local trên VPS nếu dùng Docker.
 - Khi đổi `.env`, cần restart stack để áp dụng.
 - Nếu dùng CORS khác `*`, hãy khai báo chuỗi origin hợp lệ trong `CORS_ORIGINS`.
-- Nếu chưa có embedding, chatbot vẫn hoạt động bằng filter/rule và tùy chọn DeepSeek.
+- Embedding semantic là tùy chọn; bản deploy này dùng fallback hashing nếu không cài model nặng.

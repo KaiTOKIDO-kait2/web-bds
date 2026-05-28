@@ -98,13 +98,10 @@ def _load_model() -> EmbeddingModel | None:
     settings = get_settings()
     if not settings.embedding_enabled:
         return None
-    try:
-        from sentence_transformers import SentenceTransformer
-
-        return SentenceTransformer(settings.embedding_model)
-    except Exception as exc:
-        logger.warning("semantic embedding disabled: could not load model: %s", exc)
-        return None
+    logger.info(
+        "semantic embedding model loading is disabled; using lightweight fallback hashing"
+    )
+    return None
 
 
 @lru_cache(maxsize=1)
