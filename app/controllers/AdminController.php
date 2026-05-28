@@ -19,7 +19,11 @@ class AdminController extends Controller
                 $loggedInAdmin = $adminModel->login($user, $pass);
 
                 if ($loggedInAdmin) {
+                    $_SESSION['aid'] = (int) $loggedInAdmin['aid'];
                     $_SESSION['auser'] = $loggedInAdmin['auser'];
+                    $_SESSION['aemail'] = $loggedInAdmin['aemail'];
+                    $_SESSION['adob'] = $loggedInAdmin['adob'];
+                    $_SESSION['aphone'] = $loggedInAdmin['aphone'];
                     header("Location: " . BASEURL . "/admin/dashboard");
                     exit();
                 } else {
@@ -50,7 +54,11 @@ class AdminController extends Controller
 
     public function logout()
     {
+        unset($_SESSION['aid']);
         unset($_SESSION['auser']);
+        unset($_SESSION['aemail']);
+        unset($_SESSION['adob']);
+        unset($_SESSION['aphone']);
         header("Location: " . BASEURL . "/admin/index");
         exit();
     }

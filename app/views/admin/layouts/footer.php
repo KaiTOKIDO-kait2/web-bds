@@ -83,6 +83,37 @@
 
             /* ---- Sidebar collapse/mobile toggle intentionally disabled ---- */
 
+            /* ---- Admin user dropdown: custom instant toggle ---- */
+            var $adminMenuToggle = $('#admin-user-menu-toggle');
+            var $adminMenu = $('#admin-user-menu');
+
+            function closeAdminMenu() {
+                $adminMenu.removeClass('show');
+                $adminMenuToggle.attr('aria-expanded', 'false');
+            }
+
+            function toggleAdminMenu(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var isOpen = $adminMenu.hasClass('show');
+                $('.dropdown-menu.show').not($adminMenu).removeClass('show');
+                $adminMenu.toggleClass('show', !isOpen);
+                $adminMenuToggle.attr('aria-expanded', isOpen ? 'false' : 'true');
+            }
+
+            $adminMenuToggle.on('click', toggleAdminMenu);
+            $adminMenu.on('click', '.dropdown-item', closeAdminMenu);
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('.nav.user-menu').length) {
+                    closeAdminMenu();
+                }
+            });
+            $(document).on('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeAdminMenu();
+                }
+            });
+
             /* ---- Remove old overlay element added by legacy script.js ---- */
             if ($('.sidebar-overlay').length) {
                 $('.sidebar-overlay').off('click').remove();

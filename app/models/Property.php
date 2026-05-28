@@ -2027,7 +2027,7 @@ class Property {
         if ($this->hasLegacyFeatureColumn()) {
             $this->db->bind(':feature', $this->buildFeatureHtmlFromAmenities($amenities));
         }
-        $this->db->bind(':status',  $data['status']);
+        $this->db->bind(':status',  $data['status'] ?? 'available');
         $this->db->bind(':approval_status', 'pending');
         $this->db->bind(':approval_seen', 1);
         $this->db->bind(':reviewed_at', null);
@@ -2272,12 +2272,11 @@ class Property {
             $sql .= " AND (pi.inquirer_name LIKE :search OR pi.work_email LIKE :search OR pi.phone LIKE :search)";
         }
 
-        if (!empty($filters['date_from'])) {
-            $sql .= " AND DATE(pi.created_at) >= :date_from";
-        }
-
-        if (!empty($filters['date_to'])) {
-            $sql .= " AND DATE(pi.created_at) <= :date_to";
+        if (!empty($filters['date_from']) || !empty($filters['date_to'])) {
+            $sql .= " AND COALESCE(pi.appointment_confirmed_at, pi.appointment_requested_at, pi.created_at) >= :date_from_start";
+            if (!empty($filters['date_to'])) {
+                $sql .= " AND COALESCE(pi.appointment_confirmed_at, pi.appointment_requested_at, pi.created_at) <= :date_to_end";
+            }
         }
 
         // Whitelist sortable columns to avoid SQL injection via sort parameter.
@@ -2315,11 +2314,11 @@ class Property {
         if (!empty($filters['search'])) {
             $this->db->bind(':search', '%' . $filters['search'] . '%');
         }
-        if (!empty($filters['date_from'])) {
-            $this->db->bind(':date_from', $filters['date_from']);
-        }
-        if (!empty($filters['date_to'])) {
-            $this->db->bind(':date_to', $filters['date_to']);
+        if (!empty($filters['date_from']) || !empty($filters['date_to'])) {
+            $this->db->bind(':date_from_start', !empty($filters['date_from']) ? $filters['date_from'] . ' 00:00:00' : '0000-01-01 00:00:00');
+            if (!empty($filters['date_to'])) {
+                $this->db->bind(':date_to_end', $filters['date_to'] . ' 23:59:59');
+            }
         }
         if (!empty($filters['limit'])) {
             $this->db->bind(':limit', (int) $filters['limit'], PDO::PARAM_INT);
@@ -2362,11 +2361,11 @@ class Property {
         if (!empty($filters['search'])) {
             $sql .= " AND (pi.inquirer_name LIKE :search OR pi.work_email LIKE :search OR pi.phone LIKE :search)";
         }
-        if (!empty($filters['date_from'])) {
-            $sql .= " AND DATE(pi.created_at) >= :date_from";
-        }
-        if (!empty($filters['date_to'])) {
-            $sql .= " AND DATE(pi.created_at) <= :date_to";
+        if (!empty($filters['date_from']) || !empty($filters['date_to'])) {
+            $sql .= " AND COALESCE(pi.appointment_confirmed_at, pi.appointment_requested_at, pi.created_at) >= :date_from_start";
+            if (!empty($filters['date_to'])) {
+                $sql .= " AND COALESCE(pi.appointment_confirmed_at, pi.appointment_requested_at, pi.created_at) <= :date_to_end";
+            }
         }
 
         $this->db->query($sql);
@@ -2389,50 +2388,15 @@ class Property {
         if (!empty($filters['search'])) {
             $this->db->bind(':search', '%' . $filters['search'] . '%');
         }
-        if (!empty($filters['date_from'])) {
-            $this->db->bind(':date_from', $filters['date_from']);
-        }
-        if (!empty($filters['date_to'])) {
-            $this->db->bind(':date_to', $filters['date_to']);
+        if (!empty($filters['date_from']) || !empty($filters['date_to'])) {
+            $this->db->bind(':date_from_start', !empty($filters['date_from']) ? $filters['date_from'] . ' 00:00:00' : '0000-01-01 00:00:00');
+            if (!empty($filters['date_to'])) {
+                $this->db->bind(':date_to_end', $filters['date_to'] . ' 23:59:59');
+            }
         }
 
         $result = $this->db->single();
         return $result ? (int) $result['total'] : 0;
-    }
-
-    public function getAdminTransactionList($filters = []) {
-        $queryFilters = [];
-        if (!empty($filters['status'])) {
-            $queryFilters['status'] = $filters['status'];
-        }
-        if (!empty($filters['case_status'])) {
-            $queryFilters['case_status'] = $filters['case_status'];
-        }
-        if (!empty($filters['search'])) {
-            $queryFilters['search'] = $filters['search'];
-        }
-        $queryFilters['sort'] = 'created_at';
-        $queryFilters['order'] = 'DESC';
-        if (!empty($filters['limit'])) {
-            $queryFilters['limit'] = (int) $filters['limit'];
-            $queryFilters['offset'] = !empty($filters['offset']) ? (int) $filters['offset'] : 0;
-        }
-
-        return $this->getAllInquiries($queryFilters);
-    }
-
-    public function countAdminTransactions($filters = []) {
-        $queryFilters = [];
-        if (!empty($filters['status'])) {
-            $queryFilters['status'] = $filters['status'];
-        }
-        if (!empty($filters['case_status'])) {
-            $queryFilters['case_status'] = $filters['case_status'];
-        }
-        if (!empty($filters['search'])) {
-            $queryFilters['search'] = $filters['search'];
-        }
-        return $this->countInquiries($queryFilters);
     }
 
     public function getAdminAppointments($filters = []) {

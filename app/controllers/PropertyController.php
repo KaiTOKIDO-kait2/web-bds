@@ -291,7 +291,7 @@ class PropertyController extends Controller {
                 'asize' => $_POST['asize'],
                 'loc' => $_POST['loc'],
                 'ward_id' => isset($_POST['ward_id']) ? (int) $_POST['ward_id'] : 0,
-                'status' => $_POST['status'],
+                'status' => $_POST['status'] ?? 'available',
                 'uid' => $_SESSION['uid'],
                 'property_age' => $_POST['property_age'] ?? '',
                 'swimming_pool' => $_POST['swimming_pool'] ?? 0,
@@ -333,9 +333,11 @@ class PropertyController extends Controller {
 
             $propertyModel = $this->model('Property');
             if ($propertyModel->addProperty($postData, $images)) {
-                $data['msg'] = "<p class='alert alert-success'>�ang tin th�nh c�ng. B�i dang dang ch? qu?n tr? vi�n ph� duy?t.</p>";
+                $msg = 'Đăng tin thành công. Bài đăng đang chờ quản trị viên phê duyệt.';
+                header('Location: ' . BASEURL . '/property/create?msg=' . urlencode($msg));
+                exit;
             } else {
-                $data['error'] = "<p class='alert alert-warning'>Kh�ng th? dang b?t d?ng s?n, c� l?i x?y ra</p>";
+                $data['error'] = "<p class='alert alert-warning'>Không thể đăng bất động sản, có lỗi xảy ra</p>";
             }
         }
 
@@ -351,21 +353,13 @@ class PropertyController extends Controller {
         if (!$this->canCurrentUserPostProperty()) {
             $this->redirectPostingNotAllowed();
         }
+        $redirect = BASEURL . '/agentWorkspace/index?section=posts';
+        if (!empty($_GET['msg'])) {
+            $redirect .= '&msg=' . urlencode((string) $_GET['msg']);
+        }
 
-        $propertyModel = $this->model('Property');
-        $propertyModel->markApprovalNotificationsSeen($_SESSION['uid']);
-        $currentUserType = $this->getCurrentUserType();
-
-        $data = [
-            'properties' => $propertyModel->getPropertiesByUser($_SESSION['uid']),
-            'msg' => isset($_GET['msg']) ? urldecode($_GET['msg']) : '',
-            'userType' => $currentUserType,
-            'inquiries' => in_array($currentUserType, ['owner', 'agent'], true)
-                ? $propertyModel->getInquiriesByAgent($_SESSION['uid'])
-                : []
-        ];
-
-        $this->view('property/feature', $data);
+        header('Location: ' . $redirect);
+        exit;
     }
 
     public function delete($id = '') {
@@ -380,12 +374,12 @@ class PropertyController extends Controller {
 
         $propertyModel = $this->model('Property');
         if ($propertyModel->deleteProperty($id, $_SESSION['uid'])) {
-            $msg = "<p class='alert alert-success'>�� x�a b?t d?ng s?n v� d?n d?p c�c t?p ?nh li�n quan</p>";
+            $msg = 'Đã xóa bất động sản và dọn dẹp các tệp ảnh liên quan.';
         } else {
-            $msg = "<p class='alert alert-danger'>L?i: Kh�ng t�m th?y b?t d?ng s?n ho?c b?n kh�ng c� quy?n x�a!</p>";
+            $msg = 'Lỗi: Không tìm thấy bất động sản hoặc bạn không có quyền xóa.';
         }
 
-        header("Location: " . BASEURL . "/property/feature?msg=" . urlencode($msg));
+        header('Location: ' . BASEURL . '/agentWorkspace/index?section=posts&msg=' . urlencode($msg));
         exit;
     }
 
@@ -403,8 +397,8 @@ class PropertyController extends Controller {
         $property = $propertyModel->getPropertyById($id);
 
         if (empty($property) || $property['uid'] != $_SESSION['uid']) {
-            $msg = "<p class='alert alert-danger'>L?i b?o m?t: B?n kh�ng c� quy?n truy c?p ho?c s?a t�i s?n n�y!</p>";
-            header("Location: " . BASEURL . "/property/feature?msg=" . urlencode($msg));
+            $msg = 'Lỗi bảo mật: Bạn không có quyền truy cập hoặc sửa tài sản này.';
+            header('Location: ' . BASEURL . '/agentWorkspace/index?section=posts&msg=' . urlencode($msg));
             exit;
         }
 
@@ -485,11 +479,11 @@ class PropertyController extends Controller {
             }
 
             if ($propertyModel->updateProperty($id, $_SESSION['uid'], $postData, $images)) {
-                $msg = "<p class='alert alert-success'>C?p nh?t th�nh c�ng. B�i dang d� du?c g?i l?i d? ch? ph� duy?t.</p>";
-                header("Location: " . BASEURL . "/property/feature?msg=" . urlencode($msg));
+                $msg = 'Cập nhật thành công. Bài đăng đã được gửi lại để chờ phê duyệt.';
+                header('Location: ' . BASEURL . '/agentWorkspace/index?section=posts&msg=' . urlencode($msg));
                 exit;
             } else {
-                $data['error'] = "<p class='alert alert-warning'>Kh�ng th? c?p nh?t b?t d?ng s?n</p>";
+                $data['error'] = "<p class='alert alert-warning'>Không thể cập nhật bất động sản</p>";
             }
         }
 

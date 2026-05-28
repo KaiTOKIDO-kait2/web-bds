@@ -204,11 +204,6 @@ a:hover { color: var(--primary-dark); text-decoration: none; }
   box-shadow: var(--shadow-md);
   padding: .5rem;
   min-width: 200px;
-  animation: dropIn .15s ease;
-}
-@keyframes dropIn {
-  from { opacity:0; transform:translateY(-6px); }
-  to   { opacity:1; transform:translateY(0); }
 }
 
 .user-header {

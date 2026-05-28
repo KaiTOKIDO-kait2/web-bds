@@ -18,7 +18,12 @@ class PageController extends Controller {
             'formData' => []
         ];
 
-        if(isset($_POST['send'])) {
+        if (!empty($_SESSION['contact_flash']) && is_array($_SESSION['contact_flash'])) {
+            $data['msg'] = (string) ($_SESSION['contact_flash']['message'] ?? '');
+            unset($_SESSION['contact_flash']);
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Trim and sanitize inputs
             $postData = [
                 'name' => trim($_POST['name'] ?? ''),
@@ -40,10 +45,21 @@ class PageController extends Controller {
             if(empty($postData['message']) || strlen($postData['message']) < 10) $errors[] = 'Tin nhắn phải có ít nhất 10 ký tự';
 
             if(empty($errors)) {
-                $pageModel = $this->model('Page');
-                if($pageModel->saveContactMessage($postData)) {
-                    $data['msg'] = 'Yêu cầu của bạn đã được gửi thành công. Chúng tôi sẽ liên hệ với bạn sớm nhất.';
-                    $data['formData'] = []; // Clear form on success
+                $contactModel = $this->model('Contact');
+                if ($contactModel && $contactModel->addContact(
+                    $postData['name'],
+                    $postData['email'],
+                    $postData['phone'],
+                    $postData['subject'],
+                    $postData['message']
+                )) {
+                    $_SESSION['contact_flash'] = [
+                        'type' => 'success',
+                        'message' => 'Yêu cầu của bạn đã được gửi thành công. Chúng tôi sẽ liên hệ với bạn sớm nhất.'
+                    ];
+
+                    header('Location: ' . BASEURL . '/page/contact');
+                    exit();
                 } else {
                     $data['error'] = 'Gửi tin nhắn không thành công. Vui lòng thử lại.';
                 }

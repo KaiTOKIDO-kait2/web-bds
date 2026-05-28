@@ -557,7 +557,7 @@
                             <div class="col-lg-9">
                                 <select class="form-control" required name="status">
                                     <option value="available" <?= ($row['status'] ?? '') === 'available' ? 'selected' : '' ?>>Còn trống</option>
-                                    <option value="rented" <?= in_array($row['status'] ?? '', ['rented', 'sold out'], true) ? 'selected' : '' ?>>Đã cho thuê/bán</option>
+                                    <option value="rented" <?= in_array($row['status'] ?? '', ['rented', 'sold out'], true) ? 'selected' : '' ?>>Đã cho thuê</option>
                                 </select>
                             </div>
                         </div>

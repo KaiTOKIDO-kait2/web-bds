@@ -1,4 +1,4 @@
-?<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8">
@@ -49,7 +49,7 @@
     <ul class="nav user-menu">
         <!-- User dropdown -->
         <li class="nav-item dropdown">
-            <a href="#" class="dropdown-toggle nav-link d-flex align-items-center" data-toggle="dropdown"
+            <a href="javascript:void(0)" class="dropdown-toggle nav-link d-flex align-items-center" id="admin-user-menu-toggle"
                style="gap:.6rem;padding:.25rem .5rem .25rem .25rem;">
                 <div class="user-img">
                     <img class="rounded-circle"
@@ -66,7 +66,7 @@
                 <i class="fa fa-angle-down d-none d-md-block" style="font-size:11px;color:#94a3b8;margin-left:.25rem;"></i>
             </a>
 
-            <div class="dropdown-menu dropdown-menu-right">
+            <div class="dropdown-menu dropdown-menu-right" id="admin-user-menu">
                 <a class="dropdown-item" href="<?= BASEURL ?>/adminProfile/index">
                     <i class="fa fa-user"></i> Hồ sơ
                 </a>
@@ -142,13 +142,11 @@
                 <li class="submenu" id="nav-supervision">
                     <a href="#">
                         <i class="fa fa-line-chart"></i>
-                        <span>Lead &amp; Transaction</span>
+                        <span>Lead &amp; Lịch hẹn</span>
                         <span class="menu-arrow"></span>
                     </a>
                     <ul style="display:none;">
                         <li><a href="<?= BASEURL ?>/adminInquiry/index"><i class="fa fa-phone"></i> Quản lý lead</a></li>
-                        <li><a href="<?= BASEURL ?>/adminTransaction/index"><i class="fa fa-exchange"></i> Quản lý transaction</a></li>
-                        <li><a href="<?= BASEURL ?>/adminAppointment/index"><i class="fa fa-calendar"></i> Quản lý lịch hẹn</a></li>
                     </ul>
                 </li>
 
@@ -163,7 +161,6 @@
                     <ul style="display:none;">
                         <li><a href="<?= BASEURL ?>/adminContact/index"><i class="fa fa-envelope"></i> Liên hệ từ trang chủ</a></li>
                         <li><a href="<?= BASEURL ?>/adminFeedback/index"><i class="fa fa-star"></i> Phản hồi</a></li>
-                        <li><a href="<?= BASEURL ?>/adminInquiry/index"><i class="fa fa-phone"></i> Liên hệ từ BĐS</a></li>
                     </ul>
                 </li>
 

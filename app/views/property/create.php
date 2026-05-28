@@ -179,7 +179,6 @@ $wards = isset($data['wards']) && is_array($data['wards']) ? $data['wards'] : []
 
         <form method="post" action="<?= BASEURL ?>/property/create" enctype="multipart/form-data" class="w-100">
             <?= isset($data['error']) ? $data['error'] : '' ?>
-            <?= isset($data['msg']) ? $data['msg'] : '' ?>
 
             <div class="row">
                 <!-- LEFT COLUMN: Main info -->
@@ -559,15 +558,7 @@ $wards = isset($data['wards']) && is_array($data['wards']) ? $data['wards'] : []
 
                         <hr class="my-4" style="border-color: #e1e3e4;">
 
-                        <!-- <div class="form-group row">
-                            <label class="col-form-label">Trạng thái tin đăng *</label>
-                            <div class="col-lg-9">
-                                <select class="form-control" required name="status">
-                                    <option value="available" selected>Còn sẵn</option>
-                                    <option value="sold out">Đã bán</option>
-                                </select>
-                            </div>
-                        </div> -->
+                        <input type="hidden" name="status" value="available">
 
                         <div class="form-group row mt-3">
                             <label class="col-form-label">Đánh dấu nổi bật?</label>

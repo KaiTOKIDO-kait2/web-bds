@@ -14,6 +14,42 @@ class Admin {
         return $this->db->single();
     }
 
+    public function getAdminById($id) {
+        $this->db->query("SELECT * FROM admin WHERE aid = :id LIMIT 1");
+        $this->db->bind(':id', (int) $id);
+        return $this->db->single();
+    }
+
+    public function getAdminByUser($user) {
+        $this->db->query("SELECT * FROM admin WHERE auser = :user LIMIT 1");
+        $this->db->bind(':user', $user);
+        return $this->db->single();
+    }
+
+    public function updateAdminProfile($id, $data) {
+        $this->db->query("UPDATE admin SET auser = :auser, aemail = :aemail, adob = :adob, aphone = :aphone WHERE aid = :id");
+        $this->db->bind(':auser', $data['auser']);
+        $this->db->bind(':aemail', $data['aemail']);
+        $this->db->bind(':adob', $data['adob']);
+        $this->db->bind(':aphone', $data['aphone']);
+        $this->db->bind(':id', (int) $id);
+        return $this->db->execute();
+    }
+
+    public function updateAdminPassword($id, $currentPassword, $newPassword) {
+        $this->db->query("SELECT apass FROM admin WHERE aid = :id LIMIT 1");
+        $this->db->bind(':id', (int) $id);
+        $row = $this->db->single();
+        if (empty($row) || empty($row['apass']) || (string) $row['apass'] !== sha1($currentPassword)) {
+            return false;
+        }
+
+        $this->db->query("UPDATE admin SET apass = :apass WHERE aid = :id");
+        $this->db->bind(':apass', sha1($newPassword));
+        $this->db->bind(':id', (int) $id);
+        return $this->db->execute();
+    }
+
     public function getAdmins() {
         $this->db->query("SELECT * FROM admin");
         return $this->db->resultSet();

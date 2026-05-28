@@ -511,12 +511,6 @@ $error = isset($data['error']) ? $data['error'] : '';
                 <div class="contact-form-container">
                     <h3>Gửi yêu cầu của bạn</h3>
 
-                    <?php if($msg): ?>
-                        <div class="contact-notification success show">
-                            <strong>✓ Thành công!</strong> <?= htmlspecialchars($msg) ?>
-                        </div>
-                    <?php endif; ?>
-
                     <?php if($error): ?>
                         <div class="contact-notification error show">
                             <strong>⚠ Lỗi:</strong> <?= htmlspecialchars($error) ?>
@@ -676,5 +670,16 @@ $error = isset($data['error']) ? $data['error'] : '';
     });
 })();
 </script>
+
+<?php if (!empty($msg)): ?>
+<script>
+window.APP_POPUP_AUTO = {
+    type: 'success',
+    title: 'Gửi thành công',
+    message: <?= json_encode($msg, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>,
+    confirmText: 'Đóng'
+};
+</script>
+<?php endif; ?>
 
 <?php require_once '../app/views/layouts/footer.php'; ?>

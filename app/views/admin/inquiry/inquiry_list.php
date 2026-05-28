@@ -11,11 +11,13 @@ $caseLabels = [
 ?>
 <div class="page-wrapper">
     <div class="content container-fluid">
-        <div class="page-header"><h3 class="page-title">Quản lý Lead</h3></div>
+        <div class="page-header"><h3 class="page-title">Quản lý Lead &amp; Lịch hẹn</h3></div>
         <form method="get" class="mb-3">
-            <div class="row">
-                <div class="col-md-4"><input type="text" name="search" class="form-control" value="<?= htmlspecialchars((string) ($filters['search'] ?? '')) ?>" placeholder="Tìm khách, email, số điện thoại"></div>
-                <div class="col-md-3">
+            <div class="row g-2 align-items-center flex-nowrap flex-md-wrap">
+                <div class="col-12 col-lg-5">
+                    <input type="text" name="search" class="form-control" value="<?= htmlspecialchars((string) ($filters['search'] ?? '')) ?>" placeholder="Tìm khách, email, số điện thoại">
+                </div>
+                <div class="col-12 col-lg-3">
                     <select name="status" class="form-control">
                         <option value="">Tất cả trạng thái</option>
                         <?php foreach (($workflowOptions['status'] ?? []) as $status): ?>
@@ -23,7 +25,7 @@ $caseLabels = [
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-12 col-lg-3">
                     <select name="case_status" class="form-control">
                         <option value="">Tất cả tiến trình</option>
                         <?php foreach (($workflowOptions['case_status'] ?? []) as $caseStatus): ?>
@@ -31,7 +33,16 @@ $caseLabels = [
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <div class="col-md-2"><button type="submit" class="btn btn-primary w-100">Lọc</button></div>
+                <div class="col-12 col-lg-2">
+                    <input type="date" name="date_from" class="form-control" value="<?= htmlspecialchars((string) ($filters['date_from'] ?? '')) ?>" title="Từ ngày hẹn">
+                </div>
+                <div class="col-12 col-lg-2">
+                    <input type="date" name="date_to" class="form-control" value="<?= htmlspecialchars((string) ($filters['date_to'] ?? '')) ?>" title="Đến ngày hẹn">
+                </div>
+                <div class="col-12 col-lg-auto d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Lọc</button>
+                    <a href="<?= BASEURL ?>/adminInquiry/index" class="btn btn-secondary">Reset</a>
+                </div>
             </div>
         </form>
 
@@ -39,7 +50,7 @@ $caseLabels = [
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-hover">
-                        <thead><tr><th>ID</th><th>Khách</th><th>BĐS</th><th>Môi giới</th><th>Trạng thái</th><th>Tiến trình</th><th></th></tr></thead>
+                        <thead><tr><th>ID</th><th>Khách</th><th>BĐS</th><th>Môi giới</th><th>Trạng thái</th><th>Tiến trình</th><th>Lịch đề xuất</th><th>Lịch xác nhận</th><th></th></tr></thead>
                         <tbody>
                         <?php if (!empty($inquiries)): foreach ($inquiries as $inquiry): ?>
                             <tr>
@@ -49,10 +60,12 @@ $caseLabels = [
                                 <td><?= htmlspecialchars((string) ($inquiry['agent_name'] ?? '')) ?></td>
                                 <td><?= htmlspecialchars((string) ($inquiry['status'] ?? 'pending')) ?></td>
                                 <td><?= htmlspecialchars((string) ($caseLabels[$inquiry['case_status'] ?? 'new'] ?? ($inquiry['case_status'] ?? 'new'))) ?></td>
+                                <td><?= !empty($inquiry['appointment_requested_at']) ? date('d-m-Y H:i', strtotime((string) $inquiry['appointment_requested_at'])) : 'Chưa có' ?></td>
+                                <td><?= !empty($inquiry['appointment_confirmed_at']) ? date('d-m-Y H:i', strtotime((string) $inquiry['appointment_confirmed_at'])) : 'Chưa có' ?></td>
                                 <td><a href="<?= BASEURL ?>/adminInquiry/detail/<?= (int) $inquiry['id'] ?>" class="btn btn-sm btn-info">Xem</a></td>
                             </tr>
                         <?php endforeach; else: ?>
-                            <tr><td colspan="7" class="text-center">Chưa có dữ liệu.</td></tr>
+                            <tr><td colspan="9" class="text-center">Chưa có dữ liệu.</td></tr>
                         <?php endif; ?>
                         </tbody>
                     </table>

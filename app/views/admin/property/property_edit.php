@@ -72,7 +72,6 @@
                                         <select class="form-control" required name="stype">
                                             <option value="">Chọn hình thức</option>
                                             <option value="rent" <?= $row['stype']=='rent'?'selected':'' ?>>Cho thuê</option>
-                                            <option value="sale" <?= $row['stype']=='sale'?'selected':'' ?>>Bán</option>
                                         </select>
                                     </div>
                                 </div>

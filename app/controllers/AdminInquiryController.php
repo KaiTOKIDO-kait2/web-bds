@@ -46,6 +46,18 @@ class AdminInquiryController extends Controller
         if (!empty($_GET['search'])) {
             $filters['search'] = $_GET['search'];
         }
+        if (!empty($_GET['date_from'])) {
+            $dateFrom = trim((string) $_GET['date_from']);
+            if (strtotime($dateFrom) !== false) {
+                $filters['date_from'] = date('Y-m-d', strtotime($dateFrom));
+            }
+        }
+        if (!empty($_GET['date_to'])) {
+            $dateTo = trim((string) $_GET['date_to']);
+            if (strtotime($dateTo) !== false) {
+                $filters['date_to'] = date('Y-m-d', strtotime($dateTo));
+            }
+        }
         if (!empty($_GET['sort']) && in_array($_GET['sort'], $validSorts, true)) {
             $filters['sort'] = $_GET['sort'];
         }

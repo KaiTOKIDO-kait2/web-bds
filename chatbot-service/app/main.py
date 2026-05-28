@@ -11,6 +11,7 @@ from app.config import get_settings
 from app.db import get_engine, session_scope
 from app.rate_limit import check_rate_limit
 from app.recommendation import recommend_properties
+from app.semantic_extract import _concept_vectors, _load_model
 from app.schemas import (
     BehaviorEventRequest,
     BehaviorEventResponse,
@@ -42,6 +43,18 @@ else:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+
+@app.on_event("startup")
+def warmup_embeddings() -> None:
+    """Load embedding model once during startup to avoid first-request latency."""
+    settings = get_settings()
+    if not settings.embedding_enabled:
+        return
+    # Load both the base model and concept vectors so the first chat request
+    # does not block on SentenceTransformer initialization.
+    _load_model()
+    _concept_vectors()
 
 
 def _check_internal_secret(x_internal_secret: Optional[str]) -> None:
