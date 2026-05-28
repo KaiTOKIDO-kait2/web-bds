@@ -5,4 +5,6 @@ RUN a2enmod rewrite \
 
 COPY docker/php/000-default.conf /etc/apache2/sites-available/000-default.conf
 
-WORKDIR /var/www/html
+WORKDIR /var/www/html/Real-Estate-website-in-PHP-main
+
+COPY . /var/www/html/Real-Estate-website-in-PHP-main

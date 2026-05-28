@@ -1,62 +1,86 @@
-# Chatbot tìm kiếm BĐS (FastAPI)
+# Chatbot-service
 
-Microservice xử lý hội thoại, trích xuất bộ lọc (rule + tùy chọn DeepSeek), truy vấn MySQL và fallback.
+## Deploy
 
-## Cài đặt
-
-```bash
-cd chatbot-service
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-copy .env.example .env
-```
-
-Chỉnh `.env` (biến `MYSQL_*`, `PUBLIC_BASE_PATH` trùng `BASEURL` trong PHP, ví dụ `/Real-Estate-website-in-PHP-main`). Xem [.env.example](.env.example).
-
-Import bảng chat (một lần):
-
-```sql
-SOURCE ../DATABASE FILE/chatbot_schema.sql;
-```
-
-Hoặc mở file [../DATABASE FILE/chatbot_schema.sql](../DATABASE%20FILE/chatbot_schema.sql) trong phpMyAdmin.
-
-## Chạy server
+1. Trên VPS, cài Docker và Docker Compose.
+2. Tại thư mục gốc project, tạo `.env` cho toàn bộ stack.
+3. Khởi động dịch vụ:
 
 ```bash
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+docker compose up -d --build
 ```
 
-## AI search nâng cao
+4. Kiểm tra trạng thái bằng log và danh sách container.
 
-Service hỗ trợ hybrid ranking và recommendation cá nhân hóa ở mức đồ án:
+## Env vars
 
-- `property_embedding`: lưu vector nội dung tin đăng để xếp hạng semantic.
-- `chatbot_event`: lưu impression/click từ chatbot để làm tín hiệu recommendation.
-- `GET /v1/recommendations?user_id=...&limit=8`: trả danh sách gợi ý cho user.
-- `POST /v1/events`: ghi hành vi như `chat_result_click`, `property_detail_view`.
+Thiết lập đúng các biến sau cho `chatbot-service`:
 
-Import schema bổ sung một lần:
-
-```sql
-SOURCE ai_schema.sql;
+```env
+MYSQL_HOST=db
+MYSQL_PORT=3306
+MYSQL_USER=realestate
+MYSQL_PASSWORD=realestate123
+MYSQL_DATABASE=realestatephp_new
+PUBLIC_BASE_PATH=/Real-Estate-website-in-PHP-main
+INTERNAL_SECRET=change-me
+DEEPSEEK_API_KEY=
+CORS_ORIGINS=*
+EMBEDDING_ENABLED=true
 ```
 
-Sau đó build embedding cho dữ liệu hiện có:
+Ghi chú:
+- `PUBLIC_BASE_PATH` phải khớp với đường dẫn PHP public.
+- `INTERNAL_SECRET` phải khớp giá trị proxy nội bộ từ PHP.
+- `DEEPSEEK_API_KEY` có thể để trống nếu chỉ dùng rule/filter.
+- `EMBEDDING_ENABLED=true` để bật hybrid search.
+
+## Database/schema import
+
+MySQL trong `docker-compose.yml` tự nạp dump ban đầu khi volume dữ liệu chưa tồn tại:
 
 ```bash
-cd chatbot-service
-python -m app.embedding_pipeline
+DATABASE FILE/realestatephp_new.sql
 ```
 
-Nếu chưa chạy pipeline hoặc máy chưa tải được model embedding, chatbot vẫn chạy bằng filter/rule/DeepSeek như MVP.
-Nếu `sentence-transformers` lỗi do dependency HuggingFace, pipeline sẽ dùng hashing embedding cục bộ để vẫn tạo vector cho demo. Muốn dùng model thật, cài lại dependency tương thích rồi chạy lại pipeline.
+Nếu cần nạp lại từ đầu:
+1. Xóa volume MySQL.
+2. Chạy lại:
 
-## Liên kết PHP
+```bash
+docker compose up -d --build
+```
 
-Trong `app/init.php` đã có `CHATBOT_SERVICE_URL` / `CHATBOT_INTERNAL_SECRET` (hoặc biến môi trường). Widget gọi `POST /chatbot/message` trên site PHP, PHP proxy sang FastAPI.
+Schema AI/chat đã nằm trong dump này, gồm các bảng như `chatbot_event` và `property_embedding`.
 
-## Tài liệu API
+## Embedding pipeline
 
-Xem [../CHAT-BOT-TIMKIEM/API_CONTRACT.md](../CHAT-BOT-TIMKIEM/API_CONTRACT.md).
+Sau khi DB đã có dữ liệu tin đăng, chạy pipeline để tạo vector embedding:
+
+```bash
+docker compose exec chatbot python -m app.embedding_pipeline
+```
+
+Có thể giới hạn số bản ghi:
+
+```bash
+docker compose exec chatbot python -m app.embedding_pipeline --limit 500
+```
+
+## Useful commands
+
+```bash
+docker compose ps
+docker compose logs -f chatbot
+docker compose logs -f web
+docker compose restart chatbot
+docker compose down
+docker compose up -d --build
+```
+
+## Notes
+
+- `chatbot-service` chạy sau proxy PHP, không cần cài Python local trên VPS nếu dùng Docker.
+- Khi đổi `.env`, cần restart stack để áp dụng.
+- Nếu dùng CORS khác `*`, hãy khai báo chuỗi origin hợp lệ trong `CORS_ORIGINS`.
+- Nếu chưa có embedding, chatbot vẫn hoạt động bằng filter/rule và tùy chọn DeepSeek.

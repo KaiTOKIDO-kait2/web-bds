@@ -4,7 +4,8 @@ services:
       context: .
       dockerfile: docker/php/Dockerfile
     ports:
-      - "8080:80"
+      - "80:80"
+    restart: unless-stopped
     environment:
       MYSQL_HOST: db
       MYSQL_PORT: 3306
@@ -13,8 +14,6 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE:-realestatephp_new}
       CHATBOT_SERVICE_URL: http://chatbot:8000
       CHATBOT_INTERNAL_SECRET: ${CHATBOT_INTERNAL_SECRET:-change-me}
-    volumes:
-      - ./:/var/www/html/Real-Estate-website-in-PHP-main
     depends_on:
       - db
       - chatbot
@@ -23,8 +22,7 @@ services:
     build:
       context: ./chatbot-service
       dockerfile: Dockerfile
-    ports:
-      - "8000:8000"
+    restart: unless-stopped
     environment:
       MYSQL_HOST: db
       MYSQL_PORT: 3306
@@ -48,8 +46,6 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE:-realestatephp_new}
       MYSQL_USER: ${MYSQL_USER:-realestate}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-realestate123}
-    ports:
-      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./DATABASE FILE/realestatephp_new.sql:/docker-entrypoint-initdb.d/01-realestatephp_new.sql:ro

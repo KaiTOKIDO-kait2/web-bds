@@ -1,10 +1,10 @@
-# Docker local setup
+# Docker deployment
 
-## 1. Copy environment file
+## 1. Prepare production environment
 
-Rename `.env.example` to `.env` and keep the default values unless you want to change the database credentials.
+Rename `.env.example` to `.env` and set production values for MySQL, chatbot secret, and any domain-specific settings.
 
-## 2. Start the stack
+## 2. Deploy the stack
 
 ```bash
 docker compose up -d --build
@@ -12,8 +12,8 @@ docker compose up -d --build
 
 ## 3. Open the app
 
-- Website: `http://localhost:8080/Real-Estate-website-in-PHP-main/`
-- Chatbot health: `http://localhost:8000/health`
+- Website: `http://<server-ip-or-domain>/Real-Estate-website-in-PHP-main/`
+- Chatbot stays internal to the Docker network.
 
 ## 4. Check the database
 
@@ -36,4 +36,4 @@ docker compose down
 ## 6. Notes
 
 - The PHP app still uses the project subpath in `BASEURL`, so keep the site inside `/Real-Estate-website-in-PHP-main` for now.
-- The chatbot service uses the shared MySQL database through the `db` service name.
+- Do not expose chatbot or database ports unless you explicitly need external access.
