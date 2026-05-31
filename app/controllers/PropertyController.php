@@ -312,7 +312,11 @@ class PropertyController extends Controller {
                 'isFeatured' => $_POST['isFeatured']
             ];
 
-            $uploadDir = "../admin/property/";
+            // Use absolute path from project root
+            $uploadDir = dirname(dirname(dirname(__DIR__))) . '/admin/property/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
             $images = [];
             $filesToMove = [
                 'aimage' => 'aimage', 'aimage1' => 'aimage1', 'aimage2' => 'aimage2',
@@ -453,7 +457,11 @@ class PropertyController extends Controller {
                 'isFeatured' => $property['isFeatured']
             ];
 
-            $uploadDir = "../admin/property/";
+            // Use absolute path from project root
+            $uploadDir = dirname(dirname(dirname(__DIR__))) . '/admin/property/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
             $images = [];
             $filesToMove = [
                 'aimage' => 'aimage', 'aimage1' => 'aimage1', 'aimage2' => 'aimage2',

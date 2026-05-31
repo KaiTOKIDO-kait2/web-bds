@@ -85,7 +85,11 @@ class AdminUserController extends Controller
             return $oldImage;
         }
 
-        $uploadDir = "../admin/user/";
+        // Use absolute path from project root
+        $uploadDir = dirname(dirname(dirname(__DIR__))) . '/admin/user/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
         $filename = time() . '-' . preg_replace('/[^a-zA-Z0-9._-]/', '', basename($_FILES['uimage']['name']));
         $tmpName = $_FILES['uimage']['tmp_name'];
 

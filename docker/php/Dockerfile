@@ -8,3 +8,10 @@ COPY docker/php/000-default.conf /etc/apache2/sites-available/000-default.conf
 WORKDIR /var/www/html/Real-Estate-website-in-PHP-main
 
 COPY . /var/www/html/Real-Estate-website-in-PHP-main
+
+# Create upload directories with correct permissions
+RUN mkdir -p /var/www/html/Real-Estate-website-in-PHP-main/admin/user \
+             /var/www/html/Real-Estate-website-in-PHP-main/admin/property \
+             /var/www/html/Real-Estate-website-in-PHP-main/admin/upload \
+    && chown -R www-data:www-data /var/www/html/Real-Estate-website-in-PHP-main/admin \
+    && chmod -R 775 /var/www/html/Real-Estate-website-in-PHP-main/admin

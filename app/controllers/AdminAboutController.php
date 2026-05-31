@@ -25,7 +25,12 @@ class AdminAboutController extends Controller
 
             if (!empty($title) && !empty($aimage)) {
                 $fname = time() . '_' . basename($aimage);
-                move_uploaded_file($temp_name, "../admin/upload/" . $fname);
+                // Use absolute path from project root
+                $uploadDir = dirname(dirname(dirname(__DIR__))) . '/admin/upload/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0755, true);
+                }
+                move_uploaded_file($temp_name, $uploadDir . $fname);
 
                 if ($this->aboutModel->addAbout($title, $content, $fname)) {
                     $data['msg'] = "<p class='alert alert-success'>Thêm nội dung giới thiệu thành công!</p>";
@@ -69,7 +74,12 @@ class AdminAboutController extends Controller
 
             if (!empty($aimage)) {
                 $fname = time() . '_' . basename($aimage);
-                move_uploaded_file($temp_name, "../admin/upload/" . $fname);
+                // Use absolute path from project root
+                $uploadDir = dirname(dirname(dirname(__DIR__))) . '/admin/upload/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0755, true);
+                }
+                move_uploaded_file($temp_name, $uploadDir . $fname);
             }
 
             if ($this->aboutModel->updateAbout($id, $title, $content, $fname)) {

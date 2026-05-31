@@ -829,7 +829,7 @@ class Property {
         $locationSupport = $this->getPropertyLocationColumnSupport();
         $typePayload = $this->resolvePropertyTypePayload($data);
         $amenities = $this->normalizePropertyAmenityPayload($data);
-        $uploadDir = '../admin/property/';
+        $uploadDir = dirname(dirname(dirname(__DIR__))) . '/admin/property/';
         $imageFields = ['pimage','pimage1','pimage2','pimage3','pimage4','mapimage','topmapimage','groundmapimage'];
         $imgNames = [];
         
@@ -924,7 +924,7 @@ class Property {
         $locationSupport = $this->getPropertyLocationColumnSupport();
         $typePayload = $this->resolvePropertyTypePayload($data);
         $amenities = $this->normalizePropertyAmenityPayload($data);
-        $uploadDir = '../admin/property/';
+        $uploadDir = dirname(dirname(dirname(__DIR__))) . '/admin/property/';
         $oldProp = $this->getPropertyById($id);
 
         $data['floor'] = trim((string)($data['floor'] ?? ''));
@@ -1916,7 +1916,7 @@ class Property {
             $this->db->bind(':pid', $pid);
             $this->db->bind(':uid', $uid);
             if ($this->db->execute()) {
-                $uploadDir = "../admin/property/";
+                $uploadDir = dirname(dirname(dirname(__DIR__))) . '/admin/property/';
                 foreach($images as $img) {
                     if (empty($img)) {
                         continue;
@@ -2216,7 +2216,7 @@ class Property {
             $this->db->query("DELETE FROM property WHERE pid = :pid");
             $this->db->bind(':pid', $pid);
             if($this->db->execute()) {
-                $uploadDir = "../admin/property/";
+                $uploadDir = dirname(dirname(dirname(__DIR__))) . '/admin/property/';
                 foreach($images as $img) {
                     if(!empty($img) && $this->countImageReferences($img) === 0 && file_exists($uploadDir . $img)) {
                         @unlink($uploadDir . $img);

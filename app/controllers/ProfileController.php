@@ -47,13 +47,18 @@ class ProfileController extends Controller {
                         $data['popup'] = ['type' => 'warning', 'message' => 'Ảnh đại diện chỉ hỗ trợ JPG, JPEG, PNG hoặc WEBP'];
                     } else {
                         $newImageName = time() . '_user_' . mt_rand(1000, 9999) . '.' . $ext;
-                        $uploadPath = "../admin/user/" . $newImageName;
+                        // Use absolute path from project root
+                        $uploadDir = dirname(dirname(dirname(__DIR__))) . '/admin/user/';
+                        if (!is_dir($uploadDir)) {
+                            mkdir($uploadDir, 0755, true);
+                        }
+                        $uploadPath = $uploadDir . $newImageName;
 
                         if(move_uploaded_file($_FILES['uimage']['tmp_name'], $uploadPath)) {
                             $updateData['uimage'] = $newImageName;
 
                             if(!empty($currentUser['uimage'])) {
-                                $oldImagePath = "../admin/user/" . $currentUser['uimage'];
+                                $oldImagePath = $uploadDir . $currentUser['uimage'];
                                 if(file_exists($oldImagePath)) {
                                     @unlink($oldImagePath);
                                 }

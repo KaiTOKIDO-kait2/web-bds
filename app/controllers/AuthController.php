@@ -199,7 +199,12 @@ class AuthController extends Controller {
             if(isset($_FILES['uimage']['name']) && !empty($_FILES['uimage']['name'])) {
                 $uimage = time() . '_' . basename($_FILES['uimage']['name']);
                 $temp_name = $_FILES['uimage']['tmp_name'];
-                move_uploaded_file($temp_name, "../admin/user/" . $uimage);
+                // Use absolute path from project root
+                $uploadDir = dirname(dirname(dirname(__DIR__))) . '/admin/user/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0755, true);
+                }
+                move_uploaded_file($temp_name, $uploadDir . $uimage);
             }
             $postData['uimage'] = $uimage;
 
