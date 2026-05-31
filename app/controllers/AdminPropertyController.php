@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 class AdminPropertyController extends Controller
 {
     public function __construct()
