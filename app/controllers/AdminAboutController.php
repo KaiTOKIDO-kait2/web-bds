@@ -26,7 +26,7 @@ class AdminAboutController extends Controller
             if (!empty($title) && !empty($aimage)) {
                 $fname = time() . '_' . basename($aimage);
                 // Use absolute path from project root
-                $uploadDir = dirname(dirname(dirname(__DIR__))) . '/admin/upload/';
+                $uploadDir = dirname(dirname(__DIR__)) . '/admin/upload/';
                 if (!is_dir($uploadDir)) {
                     mkdir($uploadDir, 0755, true);
                 }
@@ -75,7 +75,7 @@ class AdminAboutController extends Controller
             if (!empty($aimage)) {
                 $fname = time() . '_' . basename($aimage);
                 // Use absolute path from project root
-                $uploadDir = dirname(dirname(dirname(__DIR__))) . '/admin/upload/';
+                $uploadDir = dirname(dirname(__DIR__)) . '/admin/upload/';
                 if (!is_dir($uploadDir)) {
                     mkdir($uploadDir, 0755, true);
                 }

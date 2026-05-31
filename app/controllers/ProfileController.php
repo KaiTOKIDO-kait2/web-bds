@@ -48,7 +48,7 @@ class ProfileController extends Controller {
                     } else {
                         $newImageName = time() . '_user_' . mt_rand(1000, 9999) . '.' . $ext;
                         // Use absolute path from project root
-                        $uploadDir = dirname(dirname(dirname(__DIR__))) . '/admin/user/';
+                        $uploadDir = dirname(dirname(__DIR__)) . '/admin/user/';
                         if (!is_dir($uploadDir)) {
                             mkdir($uploadDir, 0755, true);
                         }

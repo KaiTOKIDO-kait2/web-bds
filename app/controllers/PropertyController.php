@@ -313,7 +313,7 @@ class PropertyController extends Controller {
             ];
 
             // Use absolute path from project root
-            $uploadDir = dirname(dirname(dirname(__DIR__))) . '/admin/property/';
+            $uploadDir = dirname(dirname(__DIR__)) . '/admin/property/';
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0755, true);
             }
@@ -458,7 +458,7 @@ class PropertyController extends Controller {
             ];
 
             // Use absolute path from project root
-            $uploadDir = dirname(dirname(dirname(__DIR__))) . '/admin/property/';
+            $uploadDir = dirname(dirname(__DIR__)) . '/admin/property/';
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0755, true);
             }
