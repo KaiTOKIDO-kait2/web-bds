@@ -7,7 +7,7 @@ class Page {
     }
 
     public function getAboutContent() {
-        $this->db->query("SELECT * FROM about");
+        $this->db->query("SELECT * FROM about ORDER BY id ASC");
         return $this->db->resultSet();
     }
 

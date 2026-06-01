@@ -11,8 +11,10 @@ if (!empty($aboutRows)) {
 }
 
 $overviewHtml = '';
+$overviewImage = '';
 if (!empty($aboutRows)) {
     $overviewHtml = (string)($aboutRows[0]['content'] ?? $aboutRows[0][2] ?? '');
+    $overviewImage = trim((string)($aboutRows[0]['image'] ?? $aboutRows[0][3] ?? ''));
 }
 $storyRows = count($aboutRows) > 1 ? array_slice($aboutRows, 1) : [];
 
@@ -545,7 +547,11 @@ $coreValues = [
                     </div>
                 </div>
                 <div class="about-overview-image about-reveal">
-                    <img src="<?= BASEURL ?>/images/banner/rshmpg.jpg" alt="Khong gian song thang chim LuxEstate" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <?php if ($overviewImage !== ''): ?>
+                        <img src="<?= BASEURL ?>/admin/upload/<?= htmlspecialchars($overviewImage, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8') ?>" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <?php else: ?>
+                        <img src="<?= BASEURL ?>/images/banner/rshmpg.jpg" alt="Khong gian song thang chim LuxEstate" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <?php endif; ?>
                     <div class="about-overview-image-fallback">Hinh anh gioi thieu</div>
                 </div>
             </div>

@@ -83,8 +83,22 @@
                                     <tr>
                                         <td><?= $cnt ?></td>
                                         <td><?= htmlspecialchars($row['title']) ?></td>
-                                        <td><?= htmlspecialchars(strip_tags(substr($row['content'], 0, 50))) ?>...</td>
-                                        <td><img src="<?= BASEURL ?>/admin/upload/<?= $row['image'] ?>" height="100px" width="100px"></td>
+                                        <?php
+                                        $contentPreview = html_entity_decode(strip_tags((string) ($row['content'] ?? '')), ENT_QUOTES, 'UTF-8');
+                                        $contentPreview = preg_replace('/\s+/u', ' ', trim($contentPreview));
+                                        if (mb_strlen($contentPreview, 'UTF-8') > 50) {
+                                            $contentPreview = mb_substr($contentPreview, 0, 50, 'UTF-8') . '...';
+                                        }
+                                        $aboutImage = trim((string) ($row['image'] ?? ''));
+                                        ?>
+                                        <td><?= htmlspecialchars($contentPreview, ENT_QUOTES, 'UTF-8') ?></td>
+                                        <td>
+                                            <?php if ($aboutImage !== ''): ?>
+                                                <img src="<?= BASEURL ?>/admin/upload/<?= htmlspecialchars($aboutImage, ENT_QUOTES, 'UTF-8') ?>" height="100" width="100" alt="" style="object-fit:cover;border-radius:8px;">
+                                            <?php else: ?>
+                                                <span class="text-muted">—</span>
+                                            <?php endif; ?>
+                                        </td>
                                         <td>
                                             <a href="<?= BASEURL ?>/adminAbout/edit/<?= $row['id'] ?>"><button class="btn btn-info">Sửa</button></a>
                                             <a href="<?= BASEURL ?>/adminAbout/delete/<?= $row['id'] ?>"><button class="btn btn-danger">Xóa</button></a>
