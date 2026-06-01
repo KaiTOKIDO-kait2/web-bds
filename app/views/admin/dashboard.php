@@ -261,7 +261,7 @@
                     </div>
                     <div class="ad-panel-body">
                         <?php 
-                        $txRowsCount = isset($stats['chart_transactions_by_day']) ? count($stats['chart_transactions_by_day']) : 0; 
+                        $txRowsCount = (isset($stats['chart_transactions_by_day']) && is_array($stats['chart_transactions_by_day'])) ? count($stats['chart_transactions_by_day']) : 0; 
                         $txMaxWidth = ($txRowsCount > 0 && $txRowsCount <= 4) ? 'max-width: ' . max(300, $txRowsCount * 120) . 'px; margin: 0 auto;' : '';
                         ?>
                         <div class="ad-chart-container" style="<?= $txMaxWidth ?>">
@@ -335,7 +335,7 @@
                     </div>
                     <div class="ad-panel-body">
                         <?php 
-                        $avgRowsCount = isset($stats['chart_avg_price_by_type']) ? count($stats['chart_avg_price_by_type']) : 0; 
+                        $avgRowsCount = (isset($stats['chart_avg_price_by_type']) && is_array($stats['chart_avg_price_by_type'])) ? count($stats['chart_avg_price_by_type']) : 0; 
                         $avgMaxWidth = ($avgRowsCount > 0 && $avgRowsCount <= 4) ? 'max-width: ' . max(300, $avgRowsCount * 120) . 'px; margin: 0 auto;' : '';
                         ?>
                         <div class="ad-chart-container" style="<?= $avgMaxWidth ?>">
