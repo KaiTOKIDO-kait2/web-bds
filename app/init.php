@@ -1,15 +1,24 @@
 <?php
 date_default_timezone_set('Asia/Ho_Chi_Minh');
 
+if (!function_exists('logAppBootstrap')) {
+    function logAppBootstrap(string $message): void
+    {
+        error_log('[RealEstate bootstrap] ' . $message);
+    }
+}
+
 if (!function_exists('loadEnvFile')) {
     function loadEnvFile(string $path): void
     {
         if (!is_file($path) || !is_readable($path)) {
+            logAppBootstrap('.env not found or not readable at: ' . $path);
             return;
         }
 
         $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         if ($lines === false) {
+            logAppBootstrap('Failed to read .env at: ' . $path);
             return;
         }
 
@@ -44,7 +53,23 @@ if (!function_exists('loadEnvFile')) {
     }
 }
 
-loadEnvFile(dirname(__DIR__) . '/.env');
+$envPath = dirname(__DIR__) . '/.env';
+loadEnvFile($envPath);
+
+$expectedEnvKeys = ['MYSQL_HOST', 'MYSQL_PORT', 'MYSQL_USER', 'MYSQL_PASSWORD', 'MYSQL_DATABASE'];
+$missingEnvKeys = [];
+foreach ($expectedEnvKeys as $envKey) {
+    $value = getenv($envKey);
+    if ($value === false || $value === '') {
+        $missingEnvKeys[] = $envKey;
+    }
+}
+
+if (!empty($missingEnvKeys)) {
+    logAppBootstrap('Missing env keys after bootstrap: ' . implode(', ', $missingEnvKeys));
+} else {
+    logAppBootstrap('Bootstrap env loaded successfully from: ' . $envPath);
+}
 
 require_once 'core/App.php';
 require_once 'core/Controller.php';
