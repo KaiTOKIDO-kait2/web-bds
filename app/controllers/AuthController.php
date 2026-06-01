@@ -69,6 +69,8 @@ class AuthController extends Controller {
             } else {
                 $userModel = $this->model('User');
                 $passwordResetModel = $this->model('PasswordReset');
+                require_once dirname(__DIR__) . '/libs/Mailer.php';
+                $mailer = new Mailer();
                 $user = $userModel->getUserByEmail($email);
 
                 if ($user) {
@@ -83,23 +85,16 @@ class AuthController extends Controller {
                     $resetLink = $this->getBaseUrlAbsolute() . '/auth/resetPassword?email=' . urlencode($user['uemail']) . '&token=' . urlencode($rawToken);
                     $subject = 'Yeu cau dat lai mat khau';
                     $message = "Ban da yeu cau dat lai mat khau.\n\nNhan vao link sau de dat lai mat khau (hieu luc 30 phut):\n" . $resetLink . "\n\nNeu ban khong yeu cau, vui long bo qua email nay.";
-                    $headers = "MIME-Version: 1.0\r\n";
-                    $headers .= "Content-type:text/plain;charset=UTF-8\r\n";
-
-                    $mailSent = false;
-                    if (!$this->isLocalEnvironment()) {
-                        $mailSent = @mail($user['uemail'], $subject, $message, $headers);
-                    }
+                    $mailSent = $mailer->sendResetLink($user['uemail'], $subject, $message);
 
                     if ($this->isLocalEnvironment() || !$mailSent) {
-                        // Localhost va moi truong khong gui mail: hien link test truc tiep.
                         $data['dev_link'] = $resetLink;
                     }
 
-                    if ($this->isLocalEnvironment()) {
-                        $data['msg'] = "<p class='alert alert-success'>Đã tạo link đặt lại mật khẩu để test trên localhost.</p>";
-                    } else {
+                    if ($mailSent) {
                         $data['msg'] = "<p class='alert alert-success'>Nếu email tồn tại trong hệ thống, link đặt lại mật khẩu đã được gửi.</p>";
+                    } else {
+                        $data['error'] = "<p class='alert alert-warning'>Không thể gửi email. Vui lòng kiểm tra cấu hình SMTP.</p>";
                     }
                 } else {
                     $data['msg'] = "<p class='alert alert-success'>Nếu email tồn tại trong hệ thống, link đặt lại mật khẩu đã được gửi.</p>";

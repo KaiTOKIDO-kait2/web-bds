@@ -12,7 +12,7 @@
                         <?= isset($data['error']) ? $data['error'] : '' ?>
                         <?= isset($data['msg']) ? $data['msg'] : '' ?>
 
-                        <?php if (!empty($data['dev_link'])): ?>
+                        <?php if (!empty($data['dev_link']) && !empty($data['is_local'])): ?>
                             <p class="alert alert-info mb-3">
                                 Môi trường localhost hoặc chưa cấu hình gửi mail. Dùng link này để đặt lại mật khẩu:<br>
                                 <a

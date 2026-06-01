@@ -14,6 +14,13 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE:-realestatephp_new}
       CHATBOT_SERVICE_URL: http://chatbot:8000
       CHATBOT_INTERNAL_SECRET: ${CHATBOT_INTERNAL_SECRET:-change-me}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_SECURE: ${SMTP_SECURE:-tls}
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-Real Estate}
     volumes:
       - ./admin/user:/var/www/html/Real-Estate-website-in-PHP-main/admin/user
       - ./admin/property:/var/www/html/Real-Estate-website-in-PHP-main/admin/property
