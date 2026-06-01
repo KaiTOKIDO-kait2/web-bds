@@ -35,7 +35,13 @@ Version      : 1.0
 				$(this).next('ul').slideUp(350);
 			}
 		});
-		$('#sidebar-menu ul li.submenu a.active').parents('li:last').children('a:first').addClass('active').trigger('click');
+		$('#sidebar-menu li.submenu').each(function() {
+			if ($(this).find('li.active, a.active').length) {
+				$(this).addClass('open');
+				$(this).children('ul').show();
+				$(this).children('a').addClass('subdrop');
+			}
+		});
 	}
 	
 	// Sidebar Initiate
@@ -111,7 +117,25 @@ Version      : 1.0
 	
     // Datatable
 
-    $(document).ready(function(){$("#basic-datatable").DataTable({language:{paginate:{previous:"<i class='fa fa-chevron-left'>",next:"<i class='fa fa-chevron-right'>"}},drawCallback:function(){$(".dataTables_paginate > .pagination").addClass("pagination-rounded")}});var a=$("#datatable-buttons").DataTable({lengthChange:!1,buttons:["copy","print"],language:{paginate:{previous:"<i class='fa fa-chevron-left'>",next:"<i class='fa fa-chevron-right'>"}},drawCallback:function(){$(".dataTables_paginate > .pagination").addClass("pagination-rounded")}});$("#selection-datatable").DataTable({select:{style:"multi"},language:{paginate:{previous:"<i class='fa fa-chevron-left'>",next:"<i class='fa fa-chevron-right'>"}},drawCallback:function(){$(".dataTables_paginate > .pagination").addClass("pagination-rounded")}}),$("#key-datatable").DataTable({keys:!0,language:{paginate:{previous:"<i class='fa fa-chevron-left'>",next:"<i class='fa fa-chevron-right'>"}},drawCallback:function(){$(".dataTables_paginate > .pagination").addClass("pagination-rounded")}}),a.buttons().container().appendTo("#datatable-buttons_wrapper .col-md-6:eq(0)")});
+    $(document).ready(function(){
+		var dtLang = {paginate:{previous:"<i class='fa fa-chevron-left'>",next:"<i class='fa fa-chevron-right'>"}};
+		var dtDraw = function(){$(".dataTables_paginate > .pagination").addClass("pagination-rounded")};
+		if ($("#basic-datatable").length) {
+			$("#basic-datatable").DataTable({language:dtLang, drawCallback:dtDraw});
+		}
+		if ($("#datatable-buttons").length) {
+			var a = $("#datatable-buttons").DataTable({lengthChange:!1, buttons:["copy","print"], language:dtLang, drawCallback:dtDraw});
+			if (a.buttons) {
+				a.buttons().container().appendTo("#datatable-buttons_wrapper .col-md-6:eq(0)");
+			}
+		}
+		if ($("#selection-datatable").length) {
+			$("#selection-datatable").DataTable({select:{style:"multi"}, language:dtLang, drawCallback:dtDraw});
+		}
+		if ($("#key-datatable").length) {
+			$("#key-datatable").DataTable({keys:!0, language:dtLang, drawCallback:dtDraw});
+		}
+	});
 	
 	
 	

@@ -62,22 +62,24 @@
                 }
             });
 
-            /* ---- Non-submenu links navigate normally ---- */
-            $('#sidebar-menu li:not(.submenu) > a').on('click', function(){
-                window.location.href = $(this).attr('href');
-            });
-
-            /* ---- Auto-expand active submenu ---- */
-            var path = window.location.pathname;
-            $('#sidebar-menu li:not(.submenu) a').each(function(){
+            /* ---- Highlight active sidebar link (exact path or child route) ---- */
+            var path = window.location.pathname.replace(/\/+$/, '') || '/';
+            $('#sidebar-menu a[href]').each(function(){
                 var href = $(this).attr('href');
-                if(href && href !== '#') {
-                    var hrefPath = href.replace(/^https?:\/\/[^\/]+/, '');
-                    if(path === hrefPath || path.indexOf(hrefPath) === 0) {
-                        $(this).parent().addClass('active');
-                        var $sub = $(this).closest('.submenu');
-                        if($sub.length) { $sub.addClass('open'); $sub.children('ul').show(); }
-                    }
+                if(!href || href === '#' || href.indexOf('javascript:') === 0) {
+                    return;
+                }
+                var hrefPath = href.replace(/^https?:\/\/[^\/]+/, '').replace(/\/+$/, '') || '/';
+                var isActive = (path === hrefPath) || (hrefPath !== '/' && path.indexOf(hrefPath + '/') === 0);
+                if(!isActive) {
+                    return;
+                }
+                $(this).addClass('active');
+                $(this).parent('li').addClass('active');
+                var $sub = $(this).closest('.submenu');
+                if($sub.length) {
+                    $sub.addClass('open');
+                    $sub.children('ul').show();
                 }
             });
 
