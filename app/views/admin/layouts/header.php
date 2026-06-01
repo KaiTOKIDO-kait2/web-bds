@@ -6,7 +6,7 @@
     <title>Ventura Admin – Bảng điều khiển</title>
 
     <!-- Favicon -->
-    <link rel="shortcut icon" type="image/x-icon" href="<?= BASEURL ?>/admin/assets/img/favicon.png">
+    <link rel="shortcut icon" type="image/x-icon" href="<?= BASEURL ?>/admin/assets/img/logo.png">
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="<?= BASEURL ?>/admin/assets/css/bootstrap.min.css">
     <!-- Fontawesome CSS -->
