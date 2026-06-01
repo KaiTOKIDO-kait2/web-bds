@@ -104,7 +104,9 @@ $coreValues = [
     }
     .about-overview-image {
         position: relative;
-        min-height: 380px;
+        width: 100%;
+        max-height: 400px;
+        aspect-ratio: 16 / 10;
         background: #edeeef;
         border-radius: 20px;
         overflow: hidden;
@@ -114,6 +116,7 @@ $coreValues = [
         width: 100%;
         height: 100%;
         object-fit: cover;
+        object-position: center;
         display: block;
     }
     .about-overview-image-fallback {
@@ -153,6 +156,18 @@ $coreValues = [
         font-size: 16px;
         line-height: 1.72;
         max-width: 72ch;
+    }
+    .about-overview-copy img,
+    .about-section-text img {
+        display: block;
+        max-width: 100%;
+        width: auto;
+        height: auto;
+        max-height: 280px;
+        margin: 14px 0;
+        border-radius: 12px;
+        object-fit: contain;
+        object-position: center;
     }
     .about-values {
         padding: 10px 0 70px;
@@ -259,7 +274,7 @@ $coreValues = [
     .about-section-row {
         display: grid;
         grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
-        min-height: 340px;
+        align-items: stretch;
     }
     .about-section-row.is-reverse {
         grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
@@ -290,13 +305,17 @@ $coreValues = [
     }
     .about-section-media {
         position: relative;
-        min-height: 320px;
+        width: 100%;
+        max-height: 360px;
+        aspect-ratio: 4 / 3;
         background: #edeeef;
+        overflow: hidden;
     }
     .about-section-media img {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        object-position: center;
         display: block;
     }
     .about-media-fallback {
@@ -475,7 +494,8 @@ $coreValues = [
             gap: 24px;
         }
         .about-overview-image {
-            min-height: 300px;
+            max-height: 320px;
+            aspect-ratio: 16 / 10;
         }
         .about-vision-grid,
         .about-leaders-grid {
@@ -486,7 +506,8 @@ $coreValues = [
             grid-template-columns: 1fr;
         }
         .about-section-media {
-            min-height: 260px;
+            max-height: 300px;
+            aspect-ratio: 16 / 10;
             order: 1;
         }
         .about-section-content {
@@ -518,6 +539,16 @@ $coreValues = [
         }
         .about-section-heading {
             font-size: 25px;
+        }
+        .about-overview-image {
+            max-height: 260px;
+        }
+        .about-section-media {
+            max-height: 240px;
+        }
+        .about-overview-copy img,
+        .about-section-text img {
+            max-height: 200px;
         }
         .about-cta-shell h2 {
             font-size: 28px;

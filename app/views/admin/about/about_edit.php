@@ -43,7 +43,7 @@
                                         <div class="col-lg-9">
                                             <input class="form-control" name="aimage" type="file">
                                             <br>
-                                            <img src="<?= BASEURL ?>/admin/upload/<?= $about['image'] ?>" height="150" width="150">
+                                            <img src="<?= BASEURL ?>/admin/upload/<?= htmlspecialchars($about['image'], ENT_QUOTES, 'UTF-8') ?>" alt="" style="display:block;max-width:220px;max-height:160px;width:auto;height:auto;object-fit:contain;object-position:center;border-radius:8px;border:1px solid #e2e8f0;">
                                         </div>
                                     </div>
                                     <div class="form-group row">

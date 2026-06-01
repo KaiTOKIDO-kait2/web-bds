@@ -94,7 +94,7 @@
                                         <td><?= htmlspecialchars($contentPreview, ENT_QUOTES, 'UTF-8') ?></td>
                                         <td>
                                             <?php if ($aboutImage !== ''): ?>
-                                                <img src="<?= BASEURL ?>/admin/upload/<?= htmlspecialchars($aboutImage, ENT_QUOTES, 'UTF-8') ?>" height="100" width="100" alt="" style="object-fit:cover;border-radius:8px;">
+                                                <img src="<?= BASEURL ?>/admin/upload/<?= htmlspecialchars($aboutImage, ENT_QUOTES, 'UTF-8') ?>" alt="" style="display:block;width:100px;height:72px;object-fit:cover;object-position:center;border-radius:8px;">
                                             <?php else: ?>
                                                 <span class="text-muted">—</span>
                                             <?php endif; ?>
