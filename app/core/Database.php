@@ -31,7 +31,7 @@ class Database
             $this->dbh->exec("SET time_zone = '+07:00'");
         } catch (PDOException $e) {
             $this->error = $e->getMessage();
-            error_log('[RealEstate database] PDO connection failed: ' . $this->error);
+            echo $this->error;
         }
     }
 
