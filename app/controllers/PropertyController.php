@@ -219,7 +219,8 @@ class PropertyController extends Controller {
 
     public function toggleFavorite($id = '') {
         if (!isset($_SESSION['uemail'])) {
-            header("Location: " . BASEURL . "/auth/login");
+            $msg = "<p class='alert alert-warning'>Vui lòng đăng nhập để lưu tin yêu thích.</p>";
+            header('Location: ' . BASEURL . '/property/index?msg=' . urlencode($msg));
             exit;
         }
 
@@ -501,6 +502,12 @@ class PropertyController extends Controller {
     public function submitInquiry($id = '') {
         if (!isset($_POST['send_inquiry']) || empty($id)) {
             header('Location: ' . BASEURL . '/property/detail/' . (int) $id);
+            exit;
+        }
+
+        if (!isset($_SESSION['uid'])) {
+            $msg = "<p class='alert alert-warning'>Vui lòng đăng nhập để gửi liên hệ.</p>";
+            header('Location: ' . BASEURL . '/property/detail/' . (int) $id . '?msg=' . urlencode($msg));
             exit;
         }
 

@@ -1295,10 +1295,11 @@ $typeRows = isset($data['propertyTypes']) && is_array($data['propertyTypes']) &&
                                                         </button>
                                                     </form>
                                                 <?php else: ?>
-                                                    <a href="<?= BASEURL ?>/auth/login" class="pp-favorite"
-                                                        aria-label="Đăng nhập để lưu tin">
+                                                    <button type="button" class="pp-favorite"
+                                                        aria-label="Đăng nhập để lưu tin"
+                                                        onclick="AppPopup.warning('Vui lòng đăng nhập để lưu tin yêu thích.');">
                                                         <i class="far fa-heart"></i>
-                                                    </a>
+                                                    </button>
                                                 <?php endif; ?>
                                             </div>
                                         </div>

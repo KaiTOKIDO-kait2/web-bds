@@ -92,7 +92,7 @@ class AuthController extends Controller {
                     }
 
                     if ($mailSent) {
-                        $data['msg'] = "<p class='alert alert-success'>Nếu email tồn tại trong hệ thống, link đặt lại mật khẩu đã được gửi.</p>";
+                        $data['msg'] = "<p class='alert alert-success'>Link đặt lại mật khẩu đã được gửi, vui lòng kiểm tra Email của bạn.</p>";
                     } else {
                         $data['error'] = "<p class='alert alert-warning'>Không thể gửi email. Vui lòng kiểm tra cấu hình SMTP.</p>";
                     }
@@ -189,7 +189,7 @@ class AuthController extends Controller {
                 $postData['utype'] = 'renter';
             }
 
-            // Handle file upload
+            // Handle optional file upload
             $uimage = '';
             if(isset($_FILES['uimage']['name']) && !empty($_FILES['uimage']['name'])) {
                 $uimage = time() . '_' . basename($_FILES['uimage']['name']);
@@ -203,18 +203,19 @@ class AuthController extends Controller {
             }
             $postData['uimage'] = $uimage;
 
-            if(!empty($postData['uname']) && !empty($postData['uemail']) && !empty($postData['uphone']) && !empty($postData['upass']) && !empty($postData['uimage'])) {
+            if(!empty($postData['uname']) && !empty($postData['uemail']) && !empty($postData['uphone']) && !empty($postData['upass'])) {
                 if($userModel->findUserByEmail($postData['uemail'])) {
                     $data['error'] = "<p class='alert alert-warning'>Email đã tồn tại</p>";
                 } else {
                     if($userModel->register($postData)) {
-                        $data['msg'] = "<p class='alert alert-success'>Đăng ký thành công</p>";
+                        header('Location: ' . BASEURL . '/home/index?msg=' . urlencode('Đăng ký thành công. Chào mừng bạn đến với hệ thống.'));
+                        exit;
                     } else {
                         $data['error'] = "<p class='alert alert-warning'>Đăng ký không thành công</p>";
                     }
                 }
             } else {
-                $data['error'] = "<p class='alert alert-warning'>Vui lòng điền đầy đủ thông tin hoặc tải lên ảnh đại diện</p>";
+                $data['error'] = "<p class='alert alert-warning'>Vui lòng điền đầy đủ thông tin</p>";
             }
         }
 

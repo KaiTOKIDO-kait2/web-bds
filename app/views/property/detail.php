@@ -23,6 +23,7 @@ $agentPhoneDigits = preg_replace('/\D+/', '', $agentPhoneRaw);
 $agentProfileUrl = BASEURL . '/agent/detail/' . (int)($row['uid'] ?? 0);
 $agentPostedCount = (int)($data['agentPropertyCount'] ?? 0);
 $ownerType = strtolower((string)($row['utype'] ?? ''));
+$agentFirstLetter = mb_strtoupper(mb_substr(trim((string)($row['uname'] ?? 'M')), 0, 1));
 $isOwnerAccount = false;
 $isBrokerAccount = in_array($ownerType, ['owner', 'agent'], true);
 
@@ -105,7 +106,7 @@ if ($isBrokerAccount) {
                             <div class="detail-top-actions">
                                 <button type="button" class="detail-top-action-btn" aria-label="Chia sẻ"><i class="far fa-share-square"></i></button>
                                 <button type="button" class="detail-top-action-btn" aria-label="Báo xấu"><i class="far fa-flag"></i></button>
-                                <button type="button" class="detail-top-action-btn" aria-label="Yêu thích"><i class="far fa-heart"></i></button>
+                                <button type="button" class="detail-top-action-btn" aria-label="Yêu thích" onclick="<?php if (!isset($_SESSION['uid'])): ?>AppPopup.warning('Vui lòng đăng nhập để lưu tin yêu thích.');<?php endif; ?>"><i class="far fa-heart"></i></button>
                             </div>
                         </div>
                     </div>
@@ -187,7 +188,16 @@ if ($isBrokerAccount) {
                     </h5>
                     <div class="agent-contact pt-60">
                         <div class="row">
-                            <div class="col-sm-4 col-lg-3"> <img src="<?= BASEURL ?>/admin/user/<?= htmlspecialchars($row['uimage'] ?? '') ?>" alt="" height="200" width="170"> </div>
+                            <div class="col-sm-4 col-lg-3">
+                                <?php $hasAgentAvatar = !empty($row['uimage']) && file_exists(__DIR__ . '/../../../admin/user/' . $row['uimage']); ?>
+                                <?php if ($hasAgentAvatar): ?>
+                                    <img src="<?= BASEURL ?>/admin/user/<?= htmlspecialchars($row['uimage'] ?? '') ?>" alt="" height="200" width="170">
+                                <?php else: ?>
+                                    <div style="width:170px;height:200px;border-radius:16px;background:linear-gradient(135deg,#e9f5ff 0%,#d6e9ff 100%);color:#0d6efd;display:flex;align-items:center;justify-content:center;font-size:56px;font-weight:800;">
+                                        <?= htmlspecialchars($agentFirstLetter) ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
                             <div class="col-sm-8 col-lg-9">
                                 <div class="agent-data text-ordinary mt-sm-20">
                                     <h6 class="text-success text-capitalize"><?= htmlspecialchars($row['uname'] ?? '') ?></h6>
@@ -217,7 +227,13 @@ if ($isBrokerAccount) {
                     <div class="ldp-agent-contact__header">Môi giới chuyên nghiệp</div>
                     <div class="ldp-agent-contact__body">
                         <div class="ldp-agent-contact__agent">
-                            <img class="ldp-agent-contact__avatar" src="<?= BASEURL ?>/admin/user/<?= htmlspecialchars($row['uimage'] ?? '') ?>" alt="<?= htmlspecialchars($row['uname'] ?? '') ?>">
+                            <?php if ($hasAgentAvatar): ?>
+                                <img class="ldp-agent-contact__avatar" src="<?= BASEURL ?>/admin/user/<?= htmlspecialchars($row['uimage'] ?? '') ?>" alt="<?= htmlspecialchars($row['uname'] ?? '') ?>">
+                            <?php else: ?>
+                                <div class="ldp-agent-contact__avatar" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#e9f5ff 0%,#d6e9ff 100%);color:#0d6efd;font-weight:800;font-size:28px;">
+                                    <?= htmlspecialchars($agentFirstLetter) ?>
+                                </div>
+                            <?php endif; ?>
                             <div class="ldp-agent-contact__name text-capitalize"><?= htmlspecialchars($row['uname'] ?? 'Môi giới') ?></div>
                         </div>
                         <div class="ldp-agent-contact__meta">
@@ -235,6 +251,10 @@ if ($isBrokerAccount) {
                         <?php if (in_array($propertyStatus, ['rented', 'sold out'])): ?>
                             <button type="button" class="ldp-agent-contact__inquiry" disabled style="opacity: 0.6; cursor: not-allowed;">
                                 Đã thuê
+                            </button>
+                        <?php elseif (!isset($_SESSION['uid'])): ?>
+                            <button type="button" class="ldp-agent-contact__inquiry" onclick="AppPopup.warning('Vui lòng đăng nhập để gửi liên hệ.');">
+                                Liên hệ
                             </button>
                         <?php else: ?>
                             <button type="button" class="ldp-agent-contact__inquiry" data-toggle="modal" data-target="#brokerInquiryModal">

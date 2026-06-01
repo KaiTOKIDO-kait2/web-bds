@@ -160,6 +160,14 @@
         justify-content: center;
     }
 
+    .avatar-preview-fallback {
+        background: linear-gradient(135deg, #e9f5ff 0%, #d6e9ff 100%);
+        color: #0d6efd;
+        font-size: 34px;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
     .avatar-edit-icon {
         position: absolute;
         bottom: 0;
@@ -192,14 +200,7 @@
             <form method="post" action="<?= BASEURL ?>/auth/register" enctype="multipart/form-data">
                 <div class="avatar-upload-container">
                     <div class="avatar-preview-wrapper" onclick="document.getElementById('uimage-input').click()">
-                        <div class="avatar-preview">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="45" height="45" fill="#a0a5aa"
-                                viewBox="0 0 16 16">
-                                <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
-                                <path fill-rule="evenodd"
-                                    d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z" />
-                            </svg>
-                        </div>
+                        <div class="avatar-preview avatar-preview-fallback" id="avatar-preview">?</div>
                         <div class="avatar-edit-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="#fff"
                                 viewBox="0 0 16 16">
@@ -210,11 +211,11 @@
                             </svg>
                         </div>
                     </div>
-                    <div class="avatar-upload-text">Chọn ảnh đại diện</div>
+                    <div class="avatar-upload-text">Ảnh đại diện không bắt buộc</div>
                     <input id="uimage-input" name="uimage" type="file" accept="image/*" style="display: none;">
                 </div>
                 <div class="custom-form-group">
-                    <input type="text" name="name" class="custom-form-control" placeholder="Họ và tên" required>
+                    <input id="register-name" type="text" name="name" class="custom-form-control" placeholder="Họ và tên" required>
                 </div>
                 <div class="custom-form-group">
                     <input type="email" name="email" class="custom-form-control" placeholder="Email" required>
@@ -307,17 +308,46 @@
 
         // Image preview logic
         var imageInput = document.getElementById('uimage-input');
+        var nameInput = document.getElementById('register-name');
+        var avatarPreview = document.getElementById('avatar-preview');
+
+        function renderInitialAvatar() {
+            if (!avatarPreview) {
+                return;
+            }
+
+            var fullName = nameInput ? (nameInput.value || '').trim() : '';
+            var firstLetter = fullName ? fullName.charAt(0).toUpperCase() : '?';
+            avatarPreview.className = 'avatar-preview avatar-preview-fallback';
+            avatarPreview.textContent = firstLetter;
+        }
+
+        if (nameInput) {
+            nameInput.addEventListener('input', function () {
+                if (!imageInput || !imageInput.files || !imageInput.files[0]) {
+                    renderInitialAvatar();
+                }
+            });
+        }
+
         if (imageInput) {
             imageInput.addEventListener('change', function (e) {
                 if (e.target.files && e.target.files[0]) {
                     var reader = new FileReader();
                     reader.onload = function (e) {
-                        var preview = document.querySelector('.avatar-preview');
-                        preview.innerHTML = '<img src="' + e.target.result + '" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">';
+                        if (!avatarPreview) {
+                            return;
+                        }
+                        avatarPreview.className = 'avatar-preview';
+                        avatarPreview.innerHTML = '<img src="' + e.target.result + '" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">';
                     }
                     reader.readAsDataURL(e.target.files[0]);
+                } else {
+                    renderInitialAvatar();
                 }
             });
         }
+
+        renderInitialAvatar();
     })();
 </script>
