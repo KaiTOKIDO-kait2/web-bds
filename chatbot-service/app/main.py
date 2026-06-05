@@ -11,7 +11,7 @@ from app.config import get_settings
 from app.db import get_engine, session_scope
 from app.rate_limit import check_rate_limit
 from app.recommendation import recommend_properties
-from app.semantic_extract import _concept_vectors, _load_model
+from app.semantic_extract import _concept_vectors
 from app.schemas import (
     BehaviorEventRequest,
     BehaviorEventResponse,
@@ -47,13 +47,11 @@ else:
 
 @app.on_event("startup")
 def warmup_embeddings() -> None:
-    """Load embedding model once during startup to avoid first-request latency."""
+    """Pre-load concept vectors on startup to avoid first-request latency."""
     settings = get_settings()
     if not settings.embedding_enabled:
         return
-    # Load both the base model and concept vectors so the first chat request
-    # does not block on SentenceTransformer initialization.
-    _load_model()
+    # Pre-load amenity concept vectors via Voyage API (cached by lru_cache)
     _concept_vectors()
 
 

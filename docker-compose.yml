@@ -3,8 +3,8 @@ services:
     build:
       context: .
       dockerfile: docker/php/Dockerfile
-    ports:
-      - "80:80"
+    expose:
+      - "80"
     restart: unless-stopped
     environment:
       MYSQL_HOST: db
@@ -21,6 +21,8 @@ services:
       SMTP_SECURE: ${SMTP_SECURE:-tls}
       MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-}
       MAIL_FROM_NAME: ${MAIL_FROM_NAME:-Real Estate}
+      VIRTUAL_HOST: ${DOMAIN_NAME}
+      LETSENCRYPT_HOST: ${DOMAIN_NAME}
     volumes:
       - ./admin/user:/var/www/html/Real-Estate-website-in-PHP-main/admin/user
       - ./admin/property:/var/www/html/Real-Estate-website-in-PHP-main/admin/property
@@ -40,13 +42,46 @@ services:
       MYSQL_USER: ${MYSQL_USER:-realestate}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-realestate123}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-realestatephp_new}
-      PUBLIC_BASE_PATH: /Real-Estate-website-in-PHP-main
+      PUBLIC_BASE_PATH: ""
       INTERNAL_SECRET: ${CHATBOT_INTERNAL_SECRET:-change-me}
       CORS_ORIGINS: ${CORS_ORIGINS:-*}
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
       EMBEDDING_ENABLED: ${EMBEDDING_ENABLED:-true}
+      VOYAGE_API_KEY: ${VOYAGE_API_KEY:-}
+      VOYAGE_MODEL: ${VOYAGE_MODEL:-voyage-4}
     depends_on:
       - db
+
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy:alpine
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - conf:/etc/nginx/conf.d
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - certs:/etc/nginx/certs:ro
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    restart: unless-stopped
+    depends_on:
+      - web
+
+  acme-companion:
+    image: nginxproxy/acme-companion
+    container_name: acme-companion
+    environment:
+      - DEFAULT_EMAIL=${LETSENCRYPT_EMAIL}
+    volumes:
+      - certs:/etc/nginx/certs:rw
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - acme:/etc/acme.sh
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - nginx-proxy
+    restart: unless-stopped
 
   db:
     image: mysql:8.0
@@ -64,3 +99,8 @@ services:
 
 volumes:
   mysql_data:
+  conf:
+  vhost:
+  html:
+  certs:
+  acme:

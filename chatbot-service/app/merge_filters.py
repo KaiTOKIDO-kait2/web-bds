@@ -21,6 +21,10 @@ _CLEARABLE_FIELDS = {
     "sort",
     "limit_to_pids",
     "exclude_ward_ids",
+    "water_source",
+    "interior_level",
+    "frontage_m",
+    "access_road_m",
 }
 
 

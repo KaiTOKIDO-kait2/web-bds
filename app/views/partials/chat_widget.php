@@ -46,34 +46,60 @@ if (empty($_SESSION['chatbot_session_id'])) {
     width: 56px; height: 56px; border-radius: 50%; border: none; cursor: pointer;
     background: #1a56a8; color: #fff; box-shadow: 0 6px 20px rgba(0,0,0,.18);
     display: flex; align-items: center; justify-content: center; font-size: 22px;
+    transition: transform .2s;
 }
-.re-chatbot-fab:hover { filter: brightness(1.05); }
+.re-chatbot-fab:hover { transform: scale(1.08); }
 .re-chatbot-panel {
-    position: absolute; right: 0; bottom: 64px; width: min(100vw - 32px, 380px); height: 480px;
-    background: #fff; border-radius: 12px; box-shadow: 0 12px 40px rgba(0,0,0,.2);
+    position: absolute; right: 0; bottom: 64px; width: min(100vw - 32px, 400px); height: 520px;
+    background: #fff; border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,.2);
     display: flex; flex-direction: column; overflow: hidden; border: 1px solid #e5e7eb;
 }
 .re-chatbot-header {
-    display: flex; align-items: center; justify-content: space-between; padding: 10px 12px;
-    background: #f8fafc; font-weight: 600; font-size: 14px; border-bottom: 1px solid #e5e7eb;
+    display: flex; align-items: center; justify-content: space-between; padding: 12px 14px;
+    background: linear-gradient(135deg, #1a56a8, #2563eb); color: #fff;
+    font-weight: 600; font-size: 14px;
 }
 .re-chatbot-header-actions { display: flex; gap: 8px; align-items: center; }
 .re-chatbot-linkbtn {
-    background: none; border: none; color: #1a56a8; font-size: 12px; cursor: pointer; padding: 0;
+    background: none; border: none; color: rgba(255,255,255,.85); font-size: 12px; cursor: pointer; padding: 0;
 }
-.re-chatbot-close { background: none; border: none; font-size: 22px; line-height: 1; cursor: pointer; color: #64748b; }
-.re-chatbot-messages { flex: 1; overflow-y: auto; padding: 10px; background: #f1f5f9; }
-.re-chatbot-bubble { max-width: 92%; padding: 8px 10px; border-radius: 10px; margin-bottom: 8px; font-size: 13px; line-height: 1.45; white-space: pre-wrap; }
+.re-chatbot-linkbtn:hover { color: #fff; }
+.re-chatbot-close { background: none; border: none; font-size: 22px; line-height: 1; cursor: pointer; color: rgba(255,255,255,.85); }
+.re-chatbot-close:hover { color: #fff; }
+.re-chatbot-messages { flex: 1; overflow-y: auto; padding: 12px; background: #f1f5f9; }
+.re-chatbot-bubble { max-width: 92%; padding: 10px 12px; border-radius: 12px; margin-bottom: 8px; font-size: 13px; line-height: 1.5; white-space: pre-wrap; }
 .re-chatbot-bubble.user { margin-left: auto; background: #1a56a8; color: #fff; border-bottom-right-radius: 2px; }
 .re-chatbot-bubble.bot { margin-right: auto; background: #fff; border: 1px solid #e2e8f0; border-bottom-left-radius: 2px; }
 .re-chatbot-card {
-    margin-top: 6px; padding: 8px; border-radius: 8px; background: #fff; border: 1px solid #e2e8f0; font-size: 12px;
+    margin-top: 6px; padding: 10px; border-radius: 10px; background: #fafbfc; border: 1px solid #e2e8f0; font-size: 12px;
+    transition: box-shadow .2s;
 }
-.re-chatbot-card a { color: #1a56a8; font-weight: 600; }
-.re-chatbot-form { display: flex; gap: 6px; padding: 8px; border-top: 1px solid #e5e7eb; background: #fff; }
-.re-chatbot-form input { flex: 1; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 10px; font-size: 13px; }
-.re-chatbot-send { border: none; border-radius: 8px; padding: 0 14px; background: #1a56a8; color: #fff; font-weight: 600; cursor: pointer; }
-.re-chatbot-send:disabled { opacity: .6; cursor: wait; }
+.re-chatbot-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+.re-chatbot-card a { color: #1a56a8; font-weight: 600; text-decoration: none; }
+.re-chatbot-card a:hover { text-decoration: underline; }
+.re-chatbot-card-tag {
+    display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px;
+    background: #e8f4fd; color: #1a56a8; margin-right: 4px; margin-top: 4px;
+}
+.re-chatbot-suggestions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.re-chatbot-suggestions button {
+    background: #f0f6ff; border: 1px solid #bfdbfe; color: #1a56a8; border-radius: 16px;
+    padding: 5px 12px; font-size: 12px; cursor: pointer; transition: background .15s;
+}
+.re-chatbot-suggestions button:hover { background: #dbeafe; }
+.re-chatbot-typing { display: flex; gap: 4px; align-items: center; padding: 10px 12px; }
+.re-chatbot-typing span {
+    width: 7px; height: 7px; border-radius: 50%; background: #94a3b8;
+    animation: re-chatbot-dot 1.2s infinite;
+}
+.re-chatbot-typing span:nth-child(2) { animation-delay: .2s; }
+.re-chatbot-typing span:nth-child(3) { animation-delay: .4s; }
+@keyframes re-chatbot-dot { 0%,60%,100% { opacity: .3; transform: scale(.8); } 30% { opacity: 1; transform: scale(1); } }
+.re-chatbot-form { display: flex; gap: 6px; padding: 10px; border-top: 1px solid #e5e7eb; background: #fff; }
+.re-chatbot-form input { flex: 1; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 13px; outline: none; transition: border-color .15s; }
+.re-chatbot-form input:focus { border-color: #1a56a8; }
+.re-chatbot-send { border: none; border-radius: 10px; padding: 0 16px; background: #1a56a8; color: #fff; font-weight: 600; cursor: pointer; transition: opacity .15s; }
+.re-chatbot-send:disabled { opacity: .5; cursor: wait; }
 </style>
 <script>
 (function () {
@@ -93,12 +119,79 @@ if (empty($_SESSION['chatbot_session_id'])) {
     var toggle = el('re-chatbot-toggle');
     var closeBtn = el('re-chatbot-close');
     var resetBtn = el('re-chatbot-reset');
+    var STORAGE_KEY = 're_chat_history_' + sessionId;
+
+    function escHtml(s) { return $('<div/>').text(s || '').html(); }
+
+    function saveHistory() {
+        try {
+            var items = [];
+            msgs.querySelectorAll('.re-chatbot-bubble').forEach(function(b) {
+                if (b.classList.contains('re-chatbot-typing')) return;
+                var who = b.classList.contains('user') ? 'user' : 'bot';
+                items.push({ html: b.innerHTML, who: who });
+            });
+            sessionStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+        } catch(e) {}
+    }
+
+    function loadHistory() {
+        try {
+            var raw = sessionStorage.getItem(STORAGE_KEY);
+            if (!raw) return;
+            var items = JSON.parse(raw);
+            items.forEach(function(item) {
+                var d = document.createElement('div');
+                d.className = 're-chatbot-bubble ' + (item.who === 'user' ? 'user' : 'bot');
+                d.innerHTML = item.html;
+                msgs.appendChild(d);
+            });
+            msgs.scrollTop = msgs.scrollHeight;
+        } catch(e) {}
+    }
 
     function appendBubble(text, who) {
         var d = document.createElement('div');
         d.className = 're-chatbot-bubble ' + (who === 'user' ? 'user' : 'bot');
-        d.textContent = text;
+        if (who === 'user') {
+            d.textContent = text;
+        } else {
+            d.innerHTML = escHtml(text).replace(/\n/g, '<br>');
+        }
         msgs.appendChild(d);
+        msgs.scrollTop = msgs.scrollHeight;
+        saveHistory();
+    }
+
+    function showTyping() {
+        var d = document.createElement('div');
+        d.className = 're-chatbot-bubble bot re-chatbot-typing';
+        d.id = 're-chatbot-typing-indicator';
+        d.innerHTML = '<span></span><span></span><span></span>';
+        msgs.appendChild(d);
+        msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function hideTyping() {
+        var indicator = el('re-chatbot-typing-indicator');
+        if (indicator) { indicator.remove(); }
+    }
+
+    function appendFollowUps(questions) {
+        if (!questions || !questions.length) { return; }
+        var wrap = document.createElement('div');
+        wrap.className = 're-chatbot-suggestions';
+        questions.forEach(function (q) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.textContent = q;
+            btn.addEventListener('click', function () {
+                wrap.remove();
+                sendMessage(q);
+            });
+            wrap.appendChild(btn);
+        });
+        msgs.appendChild(wrap);
         msgs.scrollTop = msgs.scrollHeight;
     }
 
@@ -114,25 +207,28 @@ if (empty($_SESSION['chatbot_session_id'])) {
             var loc = (p.ward_name || '') + (p.city_name ? (' · ' + p.city_name) : '');
             var img = p.image_path || '';
             var reasons = p.matched_reasons || [];
-            var score = p.ranking_score || null;
+            var bedroom = p.bedroom || 0;
             var html = '';
-            if (img) { html += '<div style="margin-bottom:6px"><img src="' + img.replace(/"/g, '') + '" alt="" style="max-width:100%;max-height:120px;border-radius:6px;object-fit:cover"/></div>'; }
-            html += '<div><strong>' + $('<div/>').text(title).html() + '</strong></div>';
-            html += '<div>Giá: ' + $('<div/>').text(price).html() + (p.stype === 'rent' ? ' triệu/tháng' : ' triệu') + '</div>';
-            if (loc) { html += '<div style="color:#64748b">' + $('<div/>').text(loc).html() + '</div>'; }
+            if (img) { html += '<div style="margin-bottom:6px"><img src="' + img.replace(/"/g, '') + '" alt="" style="max-width:100%;max-height:120px;border-radius:8px;object-fit:cover"/></div>'; }
+            html += '<div><strong>' + escHtml(title) + '</strong></div>';
+            html += '<div style="color:#e11d48;font-weight:600;margin:2px 0">' + escHtml(price) + (p.stype === 'rent' ? ' triệu/tháng' : ' triệu') + '</div>';
+            if (loc) { html += '<div style="color:#64748b;font-size:11px">📍 ' + escHtml(loc) + '</div>'; }
+            if (bedroom > 0) { html += '<div style="color:#64748b;font-size:11px">🛏 ' + bedroom + ' phòng ngủ</div>'; }
             if (reasons.length) {
-                html += '<div style="color:#475569;margin-top:4px">Phù hợp: ' + $('<div/>').text(reasons.slice(0, 2).join(', ')).html() + '</div>';
-            }
-            if (score) {
-                html += '<div style="color:#64748b;font-size:11px">AI score: ' + $('<div/>').text(String(score)).html() + '</div>';
+                html += '<div style="margin-top:4px">';
+                reasons.slice(0, 3).forEach(function (r) {
+                    html += '<span class="re-chatbot-card-tag">✓ ' + escHtml(r) + '</span>';
+                });
+                html += '</div>';
             }
             var link = p.detail_path || '#';
-            html += '<div style="margin-top:6px"><a class="re-chatbot-card-link" data-pid="' + String(p.pid || '').replace(/"/g, '') + '" href="' + link.replace(/"/g, '&quot;') + '">Xem chi tiết</a></div>';
+            html += '<div style="margin-top:8px"><a class="re-chatbot-card-link" data-pid="' + String(p.pid || '').replace(/"/g, '') + '" href="' + link.replace(/"/g, '&quot;') + '">Xem chi tiết →</a></div>';
             c.innerHTML = html;
             wrap.appendChild(c);
         });
         msgs.appendChild(wrap);
         msgs.scrollTop = msgs.scrollHeight;
+        saveHistory();
     }
 
     msgs.addEventListener('click', function (e) {
@@ -173,19 +269,19 @@ if (empty($_SESSION['chatbot_session_id'])) {
             data: JSON.stringify({ session_id: sessionId }),
             success: function () {
                 msgs.innerHTML = '';
-                appendBubble('Đã xóa ngữ cảnh hội thoại. Bạn cần tìm BĐS thế nào?', 'bot');
+                try { sessionStorage.removeItem(STORAGE_KEY); } catch(e) {}
+                appendBubble('Đã xóa hội thoại. Bạn muốn tìm kiếm gì mới? 😊', 'bot');
             }
         });
     });
 
-    form.addEventListener('submit', function (e) {
-        e.preventDefault();
-        var text = (input.value || '').trim();
+    function sendMessage(text) {
         if (!text) { return; }
         appendBubble(text, 'user');
         input.value = '';
         var btn = form.querySelector('.re-chatbot-send');
         btn.disabled = true;
+        showTyping();
         $.ajax({
             url: endpoint,
             method: 'POST',
@@ -193,11 +289,14 @@ if (empty($_SESSION['chatbot_session_id'])) {
             contentType: 'application/json; charset=UTF-8',
             data: JSON.stringify({ session_id: sessionId, user_text: text, locale: 'vi-VN' }),
             success: function (data) {
+                hideTyping();
                 if (data && data.reply_text) { appendBubble(data.reply_text, 'bot'); }
                 if (data && data.properties) { appendCards(data.properties); }
+                if (data && data.follow_up_questions) { appendFollowUps(data.follow_up_questions); }
             },
             error: function (xhr) {
-                var msg = 'Lỗi kết nối chatbot.';
+                hideTyping();
+                var msg = 'Xin lỗi, mình đang gặp sự cố kết nối. Bạn thử lại nhé! 🙏';
                 try {
                     var j = xhr.responseJSON || JSON.parse(xhr.responseText);
                     if (j && j.reply_text) { msg = j.reply_text; }
@@ -206,6 +305,15 @@ if (empty($_SESSION['chatbot_session_id'])) {
             },
             complete: function () { btn.disabled = false; }
         });
+    }
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        sendMessage((input.value || '').trim());
     });
+
+    // Khôi phục lịch sử chat khi load trang
+    loadHistory();
 })();
 </script>
+

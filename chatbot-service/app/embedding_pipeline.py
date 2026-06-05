@@ -55,14 +55,53 @@ def _property_rows(engine: Engine, limit: int | None = None) -> list[dict[str, A
 
 
 def rebuild_property_embeddings(limit: int | None = None) -> tuple[int, int]:
+    import time
+    from app.ai_vectors import property_text_from_row, _voyage_encode, _hash_embedding
+
     engine = get_engine()
     ensure_embedding_table(engine)
     rows = _property_rows(engine, limit=limit)
+
+    BATCH_SIZE = 10
     ok = 0
-    for row in rows:
-        if upsert_property_embedding(engine, row):
-            ok += 1
+    for i in range(0, len(rows), BATCH_SIZE):
+        batch = rows[i : i + BATCH_SIZE]
+        texts = [property_text_from_row(r) for r in batch]
+
+        # Gọi Voyage API 1 lần cho cả batch
+        vectors = _voyage_encode(texts)
+        if vectors and len(vectors) == len(batch):
+            for row, vec, txt in zip(batch, vectors, texts):
+                vec_list = [float(x) for x in vec]
+                _upsert_vec(engine, int(row["pid"]), vec_list, txt)
+                ok += 1
+        else:
+            # Fallback: hash embedding từng tin
+            for row in batch:
+                if upsert_property_embedding(engine, row):
+                    ok += 1
+
+        # Delay giữa các batch để tránh rate limit
+        if i + BATCH_SIZE < len(rows):
+            time.sleep(2.0)
+
     return ok, len(rows)
+
+
+def _upsert_vec(engine: Engine, pid: int, vec: list[float], norm_text: str = "") -> None:
+    import json
+    from app.config import get_settings
+    settings = get_settings()
+    with engine.begin() as conn:
+        conn.execute(
+            text(
+                "INSERT INTO property_embedding (property_id, embedding_json, normalized_text, model_name) "
+                "VALUES (:pid, :ej, :nt, :mn) "
+                "ON DUPLICATE KEY UPDATE embedding_json = VALUES(embedding_json), "
+                "normalized_text = VALUES(normalized_text), model_name = VALUES(model_name)"
+            ),
+            {"pid": pid, "ej": json.dumps(vec), "nt": norm_text, "mn": settings.voyage_model},
+        )
 
 
 def main() -> None:

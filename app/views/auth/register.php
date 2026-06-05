@@ -231,7 +231,7 @@
                 <div class="custom-radio-group">
                     <label>Bạn muốn</label>
                     <label class="custom-radio-inline">
-                        <input type="radio" class="js-account-intent" name="account_intent" value="renter" checked> Thuê
+                        <input type="radio" class="js-account-intent" name="account_intent" value="user" checked> Thuê
                         bất động sản
                     </label>
                     <label class="custom-radio-inline">
@@ -250,7 +250,7 @@
                         <input type="radio" class="js-provider-role" name="provider_role" value="agent"> Môi giới
                     </label>
                 </div>
-                <input type="hidden" name="utype" id="utype" value="renter">
+                <input type="hidden" name="utype" id="utype" value="user">
                 <button class="custom-login-btn" name="reg" value="Đăng ký" type="submit">Đăng ký</button>
             </form>
 
@@ -284,7 +284,7 @@
         }
 
         function syncAccountType() {
-            var intent = getCheckedValue(intentInputs, 'renter');
+            var intent = getCheckedValue(intentInputs, 'user');
 
             if (intent === 'landlord') {
                 providerGroup.style.display = 'block';
@@ -293,7 +293,7 @@
             }
 
             providerGroup.style.display = 'none';
-            utypeInput.value = 'renter';
+            utypeInput.value = 'user';
         }
 
         for (var i = 0; i < intentInputs.length; i++) {

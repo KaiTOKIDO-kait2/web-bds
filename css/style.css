@@ -2489,10 +2489,12 @@ table th {
 }
 
 .property_list_widget li img {
-  width: 80px;
-  height: auto;
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
   float: left;
   margin-right: 15px;
+  border-radius: 4px;
 }
 
 .navigation_link_widget li a {

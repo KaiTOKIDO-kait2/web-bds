@@ -53,7 +53,7 @@ class AdminPropertyController extends Controller
         $data = [
             'msg' => '',
             'error' => '',
-            'users' => $userModel->getUsersForDropdown(),
+            'users' => $userModel->getUsersForDropdown('agent'),
             'propertyTypes' => $propertyModel->getPropertyTypes(true),
             'cities' => $locationModel->getAllCities(),
             'wards' => $locationModel->getAllWards()
@@ -62,7 +62,7 @@ class AdminPropertyController extends Controller
         if (isset($_POST['add'])) {
             if ($propertyModel->adminAddProperty($_POST, $_FILES)) {
                 $data['msg'] = "<p class='alert alert-success'>Thêm bất động sản thành công!</p>";
-                $data['users'] = $userModel->getUsersForDropdown();
+                $data['users'] = $userModel->getUsersForDropdown('agent');
                 $data['propertyTypes'] = $propertyModel->getPropertyTypes(true);
                 $data['cities'] = $locationModel->getAllCities();
                 $data['wards'] = $locationModel->getAllWards();
@@ -84,7 +84,7 @@ class AdminPropertyController extends Controller
             'msg' => '',
             'error' => '',
             'property' => $propertyModel->getPropertyById($id),
-            'users' => $userModel->getUsersForDropdown(),
+            'users' => $userModel->getUsersForDropdown('agent'),
             'propertyTypes' => $propertyModel->getPropertyTypes(true),
             'cities' => $locationModel->getAllCities(),
             'wards' => $locationModel->getAllWards()

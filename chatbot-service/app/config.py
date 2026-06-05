@@ -65,6 +65,9 @@ class Settings:
     embedding_enabled: bool
     embedding_model: str
     embedding_threshold: float
+    voyage_api_key: str
+    voyage_api_url: str
+    voyage_model: str
 
 
 @lru_cache
@@ -75,7 +78,7 @@ def get_settings() -> Settings:
         mysql_user=_env_str("MYSQL_USER", "root"),
         mysql_password=_env_str("MYSQL_PASSWORD", ""),
         mysql_database=_env_str("MYSQL_DATABASE", "realestatephp_new"),
-        public_base_path=_env_str("PUBLIC_BASE_PATH", "/Real-Estate-website-in-PHP-main"),
+        public_base_path=_env_str("PUBLIC_BASE_PATH", ""),
         internal_secret=_env_str("INTERNAL_SECRET", ""),
         deepseek_api_key=_env_str("DEEPSEEK_API_KEY", ""),
         deepseek_api_url=_env_str("DEEPSEEK_API_URL", "https://api.deepseek.com/v1/chat/completions"),
@@ -87,8 +90,11 @@ def get_settings() -> Settings:
         max_ranking_candidates=_env_int("MAX_RANKING_CANDIDATES", 80),
         recommendation_return=_env_int("RECOMMENDATION_RETURN", 8),
         embedding_enabled=_env_bool("EMBEDDING_ENABLED", False),
-        embedding_model=_env_str("EMBEDDING_MODEL", "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"),
-        embedding_threshold=_env_float("EMBEDDING_THRESHOLD", 0.55),
+        embedding_model=_env_str("EMBEDDING_MODEL", "voyage-4"),
+        embedding_threshold=_env_float("EMBEDDING_THRESHOLD", 0.50),
+        voyage_api_key=_env_str("VOYAGE_API_KEY", ""),
+        voyage_api_url=_env_str("VOYAGE_API_URL", "https://api.voyageai.com/v1/embeddings"),
+        voyage_model=_env_str("VOYAGE_MODEL", "voyage-4"),
     )
 
 

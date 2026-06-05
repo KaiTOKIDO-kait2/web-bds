@@ -41,6 +41,10 @@ class SearchFilters(BaseModel):
     sort: Optional[Literal["relevance", "price_asc", "price_desc"]] = None
     limit_to_pids: list[int] = Field(default_factory=list)
     exclude_ward_ids: list[int] = Field(default_factory=list)
+    water_source: Optional[Literal["nuoc_ngam", "bon_chua"]] = None
+    interior_level: Optional[Literal["co_ban", "day_du", "khong"]] = None
+    frontage_m: Optional[float] = None
+    access_road_m: Optional[float] = None
 
     def model_dump_non_null(self) -> dict[str, Any]:
         d = model_to_dict(self, exclude_none=True)
@@ -145,3 +149,7 @@ class LlmExtractPayload(BaseModel):
     size_max: Optional[int] = None
     keyword: Optional[str] = None
     amenities: Optional[dict[str, bool]] = None
+    water_source: Optional[str] = None
+    interior_level: Optional[str] = None
+    frontage_m: Optional[float] = None
+    access_road_m: Optional[float] = None

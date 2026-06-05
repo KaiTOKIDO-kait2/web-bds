@@ -1,6 +1,7 @@
 <?php
 date_default_timezone_set('Asia/Ho_Chi_Minh');
 
+// hàm giúp đọc file .env và gán các biến cho $_ENV và $_SERVER . ví dụ CHATBOT_SERVICE_URL=http://127.0.0.1:8000
 if (!function_exists('loadEnvFile')) {
     function loadEnvFile(string $path): void
     {
@@ -43,7 +44,7 @@ if (!function_exists('loadEnvFile')) {
         }
     }
 }
-
+// load file .env 
 $envPath = dirname(__DIR__) . '/.env';
 loadEnvFile($envPath);
 
@@ -80,7 +81,7 @@ if (!function_exists('detectBaseUrl')) {
 
 define('BASEURL', detectBaseUrl());
 
-// Chatbot microservice (FastAPI) — có thể ghi đè bằng biến môi trường hệ thống
+// Lấy BASE URL của chatbot
 if (!defined('CHATBOT_SERVICE_URL')) {
     $chatbotUrl = getenv('CHATBOT_SERVICE_URL');
     define(

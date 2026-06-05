@@ -584,7 +584,7 @@ class PropertyController extends Controller {
         }
 
         $ownerType = strtolower((string) ($property['utype'] ?? ''));
-        $isOwnerDirect = in_array($ownerType, ['owner', 'user', 'renter'], true);
+        $isOwnerDirect = in_array($ownerType, ['owner', 'user'], true);
         $phone = trim((string) ($property['uphone'] ?? ''));
         $detailUrl = BASEURL . '/property/detail/' . $id;
 

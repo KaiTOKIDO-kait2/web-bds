@@ -75,20 +75,70 @@ def _hash_embedding(value: str, dimensions: int = 384) -> list[float]:
     return [x / norm for x in vec]
 
 
+def _voyage_encode(texts: list[str]) -> Optional[list[list[float]]]:
+    """Gọi Voyage AI Embedding API với retry khi bị rate limit."""
+    settings = get_settings()
+    if not settings.voyage_api_key:
+        return None
+    import httpx
+    import time
+    import logging
+    log = logging.getLogger(__name__)
+
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            resp = httpx.post(
+                settings.voyage_api_url,
+                headers={
+                    "Authorization": f"Bearer {settings.voyage_api_key}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "input": texts,
+                    "model": settings.voyage_model,
+                },
+                timeout=30.0,
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            return [item["embedding"] for item in data["data"]]
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code == 429 and attempt < max_retries - 1:
+                wait = 2 ** (attempt + 1)  # 2s, 4s, 8s
+                log.info("voyage rate limit, retry in %ds...", wait)
+                time.sleep(wait)
+                continue
+            log.warning("voyage embedding API error: %s", exc)
+            return None
+        except Exception as exc:
+            log.warning("voyage embedding API error: %s", exc)
+            return None
+    return None
+
+
 def encode_text(value: str) -> Optional[list[float]]:
     settings = get_settings()
     if not settings.embedding_enabled:
         return None
-    model = _load_model()
-    if model is None:
-        return _hash_embedding(value)
-    try:
-        vec = model.encode([value], normalize_embeddings=True)[0]
-    except Exception:
-        return _hash_embedding(value)
-    if hasattr(vec, "tolist"):
-        vec = vec.tolist()
-    return [float(x) for x in vec]
+    # Ưu tiên Voyage API
+    result = _voyage_encode([value])
+    if result and len(result) > 0:
+        return [float(x) for x in result[0]]
+    # Fallback hash nếu API không khả dụng
+    return _hash_embedding(value)
+
+
+def encode_texts_batch(values: list[str]) -> list[Optional[list[float]]]:
+    """Encode nhiều text cùng lúc (tiết kiệm API calls cho embedding_pipeline)."""
+    settings = get_settings()
+    if not settings.embedding_enabled:
+        return [None] * len(values)
+    result = _voyage_encode(values)
+    if result and len(result) == len(values):
+        return [[float(x) for x in vec] for vec in result]
+    # Fallback từng cái
+    return [_hash_embedding(v) for v in values]
 
 
 def cosine(a: Iterable[float], b: Iterable[float]) -> float:

@@ -565,7 +565,7 @@ $error = isset($data['error']) ? $data['error'] : '';
                                 required
                             >
                                 <option value="buyer" <?= ($formData['user_type'] ?? '') === 'buyer' ? 'selected' : '' ?>>Người mua</option>
-                                <option value="renter" <?= ($formData['user_type'] ?? '') === 'renter' ? 'selected' : '' ?>>Người thuê</option>
+                                <option value="user" <?= ($formData['user_type'] ?? '') === 'user' ? 'selected' : '' ?>>Người dùng</option>
                                 <option value="owner" <?= ($formData['user_type'] ?? '') === 'owner' ? 'selected' : '' ?>>Chủ nhà</option>
                                 <option value="broker" <?= ($formData['user_type'] ?? '') === 'broker' ? 'selected' : '' ?>>Môi giới</option>
                             </select>

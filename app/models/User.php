@@ -180,11 +180,6 @@ class User {
     }
 
     public function getUsersByType($type) {
-        if ($type === 'user') {
-            $this->db->query("SELECT * FROM user WHERE utype IN ('user', 'renter') ORDER BY uid DESC");
-            return $this->db->resultSet();
-        }
-
         $this->db->query("SELECT * FROM user WHERE utype = :type ORDER BY uid DESC");
         $this->db->bind(':type', $type);
         return $this->db->resultSet();
@@ -320,8 +315,13 @@ class User {
         return $this->db->execute();
     }
 
-    public function getUsersForDropdown() {
-        $this->db->query("SELECT uid, uname FROM user ORDER BY uname ASC");
+    public function getUsersForDropdown($utype = '') {
+        if ($utype !== '') {
+            $this->db->query("SELECT uid, uname FROM user WHERE utype = :utype ORDER BY uname ASC");
+            $this->db->bind(':utype', $utype);
+        } else {
+            $this->db->query("SELECT uid, uname FROM user ORDER BY uname ASC");
+        }
         return $this->db->resultSet();
     }
 

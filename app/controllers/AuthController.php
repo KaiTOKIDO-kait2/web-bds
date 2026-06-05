@@ -172,7 +172,7 @@ class AuthController extends Controller {
             'msg' => '',
             'error' => ''
         ];
-        $allowedAccountTypes = ['renter', 'owner', 'agent'];
+        $allowedAccountTypes = ['user', 'owner', 'agent'];
 
         if(isset($_POST['reg'])) {
             $userModel = $this->model('User');
@@ -182,11 +182,11 @@ class AuthController extends Controller {
                 'uemail' => trim($_POST['email']),
                 'uphone' => trim($_POST['phone']),
                 'upass' => trim($_POST['pass']),
-                'utype' => trim($_POST['utype'] ?? 'renter')
+                'utype' => trim($_POST['utype'] ?? 'user')
             ];
 
             if (!in_array($postData['utype'], $allowedAccountTypes, true)) {
-                $postData['utype'] = 'renter';
+                $postData['utype'] = 'user';
             }
 
             // Handle optional file upload

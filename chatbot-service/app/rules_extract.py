@@ -201,8 +201,46 @@ def extract_rules(normalized_text: str) -> dict[str, Any]:
         am["parking"] = True
     if re.search(r"(wifi|wi-fi|internet|mạng|mang|mạng mẽo|mang meo|mạng đầy đủ|mang day du)", text):
         am["wifi"] = True
+    if re.search(r"(gần bệnh viện|gan benh vien|gần viện|near hospital|chữa bệnh|chua benh|khám bệnh|kham benh|phòng khám|phong kham)", text):
+        am["near_hospital"] = True
+    if re.search(r"(gần chợ|gan cho|gần siêu thị|gan sieu thi|near market)", text):
+        am["near_market"] = True
+    if re.search(r"(thang máy|thang may|elevator)", text):
+        am["elevator"] = True
+    if re.search(r"(camera|cctv)", text):
+        am["cctv"] = True
     if am:
         out["amenities"] = am
+
+    # --- Nguồn nước ---
+    if re.search(r"(nước ngầm|nuoc ngam|giếng khoan|gieng khoan)", text):
+        out["water_source"] = "nuoc_ngam"
+    elif re.search(r"(bồn chứa|bon chua|bể chứa|be chua|nước máy|nuoc may)", text):
+        out["water_source"] = "bon_chua"
+
+    # --- Nội thất ---
+    if re.search(r"(nội thất đầy đủ|noi that day du|full nội thất|full noi that|đầy đủ nội thất|day du noi that)", text):
+        out["interior_level"] = "day_du"
+    elif re.search(r"(nội thất cơ bản|noi that co ban)", text):
+        out["interior_level"] = "co_ban"
+    elif re.search(r"(không nội thất|khong noi that|nhà trống|nha trong)", text):
+        out["interior_level"] = "khong"
+
+    # --- Mặt tiền (frontage) ---
+    m_ft = re.search(r"mặt tiền\s*(\d+(?:[.,]\d+)?)\s*m", text)
+    if not m_ft:
+        m_ft = re.search(r"mat tien\s*(\d+(?:[.,]\d+)?)\s*m", text)
+    if m_ft:
+        out["frontage_m"] = float(m_ft.group(1).replace(",", "."))
+
+    # --- Đường vào (access road) ---
+    m_ar = re.search(r"đường vào\s*(\d+(?:[.,]\d+)?)\s*m", text)
+    if not m_ar:
+        m_ar = re.search(r"duong vao\s*(\d+(?:[.,]\d+)?)\s*m", text)
+    if not m_ar:
+        m_ar = re.search(r"hẻm\s*(\d+(?:[.,]\d+)?)\s*m", text)
+    if m_ar:
+        out["access_road_m"] = float(m_ar.group(1).replace(",", "."))
 
     return out
 

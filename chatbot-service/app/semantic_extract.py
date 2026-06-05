@@ -3,16 +3,11 @@ from __future__ import annotations
 import logging
 import math
 from functools import lru_cache
-from typing import Any, Protocol
+from typing import Any
 
 from app.config import get_settings
 
 logger = logging.getLogger(__name__)
-
-
-class EmbeddingModel(Protocol):
-    def encode(self, sentences: list[str], normalize_embeddings: bool = True) -> Any:
-        ...
 
 
 AMENITY_CONCEPTS: dict[str, list[str]] = {
@@ -78,13 +73,9 @@ AMENITY_CONCEPTS: dict[str, list[str]] = {
 }
 
 
-def _to_vector(value: Any) -> list[float]:
-    if hasattr(value, "tolist"):
-        value = value.tolist()
-    return [float(x) for x in value]
-
-
 def _cosine(a: list[float], b: list[float]) -> float:
+    if not a or not b or len(a) != len(b):
+        return 0.0
     dot = sum(x * y for x, y in zip(a, b))
     norm_a = math.sqrt(sum(x * x for x in a))
     norm_b = math.sqrt(sum(y * y for y in b))
@@ -93,56 +84,40 @@ def _cosine(a: list[float], b: list[float]) -> float:
     return dot / (norm_a * norm_b)
 
 
+# Giữ lại hàm _load_model cho backward compatibility (ai_vectors.py import nó)
 @lru_cache(maxsize=1)
-def _load_model() -> EmbeddingModel | None:
-    settings = get_settings()
-    if not settings.embedding_enabled:
-        return None
-    logger.info(
-        "semantic embedding model loading is disabled; using lightweight fallback hashing"
-    )
+def _load_model():
     return None
 
 
 @lru_cache(maxsize=1)
 def _concept_vectors() -> dict[str, list[list[float]]]:
-    model = _load_model()
-    if model is None:
+    """Tạo concept vectors cho amenities bằng Voyage API (gọi 1 lần duy nhất, cached)."""
+    from app.ai_vectors import _voyage_encode
+
+    # Gom tất cả phrases thành 1 batch
+    all_phrases: list[str] = []
+    mapping: list[tuple[str, int]] = []  # (amenity_name, phrase_count)
+    for name, phrases in AMENITY_CONCEPTS.items():
+        mapping.append((name, len(phrases)))
+        all_phrases.extend(phrases)
+
+    result = _voyage_encode(all_phrases)
+    if result is None or len(result) != len(all_phrases):
+        logger.warning("concept vectors: Voyage API unavailable, semantic extract disabled")
         return {}
 
     vectors: dict[str, list[list[float]]] = {}
-    for name, phrases in AMENITY_CONCEPTS.items():
-        encoded = model.encode(phrases, normalize_embeddings=True)
-        vectors[name] = [_to_vector(item) for item in encoded]
+    idx = 0
+    for name, count in mapping:
+        vectors[name] = [[float(x) for x in result[idx + i]] for i in range(count)]
+        idx += count
+    logger.info("concept vectors loaded: %d amenities via Voyage API", len(vectors))
     return vectors
 
 
 def extract_semantic_filters(normalized_text: str) -> dict[str, Any]:
-    settings = get_settings()
-    if not settings.embedding_enabled:
-        return {}
-
-    text = (normalized_text or "").strip()
-    if not text:
-        return {}
-
-    model = _load_model()
-    concepts = _concept_vectors()
-    if model is None or not concepts:
-        return {}
-
-    try:
-        user_vec = _to_vector(model.encode([text], normalize_embeddings=True)[0])
-    except Exception as exc:
-        logger.warning("semantic embedding disabled for request: %s", exc)
-        return {}
-
-    amenities: dict[str, bool] = {}
-    for name, vectors in concepts.items():
-        best = max((_cosine(user_vec, vec) for vec in vectors), default=0.0)
-        if best >= settings.embedding_threshold:
-            amenities[name] = True
-
-    if amenities:
-        return {"amenities": amenities}
+    """Amenity detection bằng cosine similarity không đủ chính xác (false positive cao).
+    Embedding chỉ dùng cho property ranking. Amenity detection dùng rules + LLM."""
     return {}
+

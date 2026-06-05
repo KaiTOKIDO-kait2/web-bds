@@ -61,17 +61,17 @@ if ($isBrokerAccount) {
             <div class="col-lg-8">
                 <div class="row">
                     <div class="col-md-12">
-                        <div id="single-property" style="width:1200px; height:700px; margin:30px auto 50px;"> 
+                        <div id="single-property" style="width:100%; max-width:1200px; height:600px; margin:30px auto 100px;"> 
                             <!-- Slide 1-->
-                            <div class="ls-slide" data-ls="duration:7500; transition2d:5; kenburnszoom:in; kenburnsscale:1.2;"> <img width="1920" height="1080" src="<?= BASEURL ?>/admin/property/<?= htmlspecialchars($row['pimage']) ?>" class="ls-bg" alt="" /> </div>
+                            <div class="ls-slide" data-ls="duration:7500; transition2d:5; kenburnszoom:in; kenburnsscale:1.2;"> <img style="object-fit: cover; width: 100%; height: 100%;" src="<?= BASEURL ?>/admin/property/<?= htmlspecialchars($row['pimage']) ?>" class="ls-bg" alt="" /> </div>
                             <!-- Slide 2-->
-                            <div class="ls-slide" data-ls="duration:7500; transition2d:5; kenburnszoom:in; kenburnsscale:1.2;"> <img width="1920" height="1080" src="<?= BASEURL ?>/admin/property/<?= htmlspecialchars($row['pimage1']) ?>" class="ls-bg" alt="" /> </div>
+                            <div class="ls-slide" data-ls="duration:7500; transition2d:5; kenburnszoom:in; kenburnsscale:1.2;"> <img style="object-fit: cover; width: 100%; height: 100%;" src="<?= BASEURL ?>/admin/property/<?= htmlspecialchars($row['pimage1']) ?>" class="ls-bg" alt="" /> </div>
                             <!-- Slide 3-->
-                            <div class="ls-slide" data-ls="duration:7500; transition2d:5; kenburnszoom:in; kenburnsscale:1.2;"> <img width="1920" height="1080" src="<?= BASEURL ?>/admin/property/<?= htmlspecialchars($row['pimage2']) ?>" class="ls-bg" alt="" /> </div>
+                            <div class="ls-slide" data-ls="duration:7500; transition2d:5; kenburnszoom:in; kenburnsscale:1.2;"> <img style="object-fit: cover; width: 100%; height: 100%;" src="<?= BASEURL ?>/admin/property/<?= htmlspecialchars($row['pimage2']) ?>" class="ls-bg" alt="" /> </div>
                             <!-- Slide 4-->
-                            <div class="ls-slide" data-ls="duration:7500; transition2d:5; kenburnszoom:in; kenburnsscale:1.2;"> <img width="1920" height="1080" src="<?= BASEURL ?>/admin/property/<?= htmlspecialchars($row['pimage3']) ?>" class="ls-bg" alt="" /> </div>
+                            <div class="ls-slide" data-ls="duration:7500; transition2d:5; kenburnszoom:in; kenburnsscale:1.2;"> <img style="object-fit: cover; width: 100%; height: 100%;" src="<?= BASEURL ?>/admin/property/<?= htmlspecialchars($row['pimage3']) ?>" class="ls-bg" alt="" /> </div>
                             <!-- Slide 5-->
-                            <div class="ls-slide" data-ls="duration:7500; transition2d:5; kenburnszoom:in; kenburnsscale:1.2;"> <img width="1920" height="1080" src="<?= BASEURL ?>/admin/property/<?= htmlspecialchars($row['pimage4']) ?>" class="ls-bg" alt="" /> </div>
+                            <div class="ls-slide" data-ls="duration:7500; transition2d:5; kenburnszoom:in; kenburnsscale:1.2;"> <img style="object-fit: cover; width: 100%; height: 100%;" src="<?= BASEURL ?>/admin/property/<?= htmlspecialchars($row['pimage4']) ?>" class="ls-bg" alt="" /> </div>
                         </div>
                     </div>
                 </div>

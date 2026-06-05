@@ -91,6 +91,10 @@ def relax_filters(base: SearchFilters, level: int) -> SearchFilters:
     f = _clone_filters(base)
     if level >= 1:
         f.amenities = AmenitiesFilter()
+        f.water_source = None
+        f.interior_level = None
+        f.frontage_m = None
+        f.access_road_m = None
     if level >= 2 and f.price_max_million is not None:
         f.price_max_million = round(float(f.price_max_million) * 1.12, 2)
     if level >= 3:
@@ -199,6 +203,34 @@ def _build_query(engine: Engine, f: SearchFilters, for_count: bool) -> tuple[str
     if has_wards and f.ward_id is None and f.ward_name_hint and len(f.ward_name_hint.strip()) >= 2:
         where_parts.append("w.wname LIKE :ward_hint")
         params["ward_hint"] = "%" + f.ward_name_hint.strip() + "%"
+
+    # --- Extended property attributes (property_amenity table) ---
+    has_amenity = _schema_has(engine, "table", "property_amenity")
+    if has_amenity:
+        if f.water_source:
+            if not am_on:
+                joins.append("INNER JOIN property_amenity pa ON pa.property_id = p.pid")
+                am_on = " joined"
+            where_parts.append("pa.water_source = :ws")
+            params["ws"] = f.water_source
+        if f.interior_level:
+            if not am_on:
+                joins.append("INNER JOIN property_amenity pa ON pa.property_id = p.pid")
+                am_on = " joined"
+            where_parts.append("pa.interior_level = :il")
+            params["il"] = f.interior_level
+        if f.frontage_m is not None:
+            if not am_on:
+                joins.append("INNER JOIN property_amenity pa ON pa.property_id = p.pid")
+                am_on = " joined"
+            where_parts.append("pa.frontage_m >= :fm")
+            params["fm"] = float(f.frontage_m)
+        if f.access_road_m is not None:
+            if not am_on:
+                joins.append("INNER JOIN property_amenity pa ON pa.property_id = p.pid")
+                am_on = " joined"
+            where_parts.append("pa.access_road_m >= :arm")
+            params["arm"] = float(f.access_road_m)
 
     where_sql = " WHERE " + " AND ".join(where_parts)
 
@@ -371,7 +403,18 @@ def search_with_fallback(
                 )
             )
         if level > 0:
-            last_note = "Không có tin khớp hoàn toàn; đã nới lỏng bộ lọc để gợi ý gần đúng."
+            relaxed: list[str] = []
+            if level >= 1:
+                relaxed.append("tiện ích")
+            if level >= 2:
+                relaxed.append("giá")
+            if level >= 3:
+                relaxed.append("khu vực")
+            if level >= 4:
+                relaxed.append("loại BĐS")
+            if level >= 6:
+                relaxed.append("từ khóa")
+            last_note = f"Không có tin khớp hoàn toàn nên mình đã nới lỏng tiêu chí: {', '.join(relaxed)}."
         return cards, total, level, last_note, context_pids
 
     return [], 0, 6, "Chưa có tin phù hợp trong dữ liệu hiện tại.", []

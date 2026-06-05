@@ -28,6 +28,10 @@ size_min: số (đơn vị: m2)
 size_max: số
 keyword: chuỗi ngắn địa danh/đường
 amenities: object boolean: swimming_pool, parking, gym, near_school, security, near_hospital, near_market, wifi, elevator, cctv
+water_source: "nuoc_ngam" (nước ngầm/giếng khoan) hoặc "bon_chua" (bồn chứa/nước máy)
+interior_level: "day_du" (nội thất đầy đủ/full) | "co_ban" (cơ bản) | "khong" (không/nhà trống)
+frontage_m: số (mặt tiền tối thiểu, đơn vị: m)
+access_road_m: số (đường vào/hẻm tối thiểu, đơn vị: m)
 sort: "price_asc" nếu user nói giá rẻ/giá mềm/tiết kiệm nhưng không nêu ngân sách cụ thể; "price_desc" nếu user muốn giá cao/đắt nhất
 
 === QUY TẮC NGỮ CẢNH (quan trọng) ===
@@ -48,8 +52,20 @@ sort: "price_asc" nếu user nói giá rẻ/giá mềm/tiết kiệm nhưng khô
    "đắt hơn X triệu" → lấy price_min hiện tại cộng X.
    "giá rẻ", "giá mềm", "tiết kiệm", "vừa túi tiền" → sort="price_asc", KHÔNG tự đặt price_max_million.
 
-5. AMENITIES: wifi/mạng/internet → wifi=true; an ninh/bảo vệ → security=true;
-   gym/tập tạ → gym=true; mua sắm/chợ/siêu thị → near_market=true.
+5. AMENITIES — CHỈ đặt amenity mà user TRỰC TIẾP nhắc đến hoặc ngụ ý RÕ RÀNG.
+   TUYỆT ĐỐI KHÔNG tự thêm amenity mà user không hề đề cập.
+   Mapping cho phép:
+   - wifi/mạng/internet/sóng → wifi=true
+   - an ninh/bảo vệ/dân trí cao → security=true
+   - gym/tập tạ/rèn luyện sức khỏe/tập thể dục → gym=true
+   - mua sắm/chợ/siêu thị → near_market=true
+   - bơi/hồ bơi/bơi lội/chỗ tắm → swimming_pool=true
+   - bệnh viện/chữa bệnh/khám bệnh/phòng khám → near_hospital=true
+   - trường/trường học/gần trường → near_school=true
+   - bãi xe/chỗ đậu xe/parking → parking=true
+   - thang máy/elevator → elevator=true
+   - camera/cctv/giám sát → cctv=true
+   Nếu user nói "rèn luyện sức khỏe và bơi lội" → CHỈ trả {gym:true, swimming_pool:true}. KHÔNG thêm wifi, cctv hay bất kỳ amenity nào khác.
 
 6. NGỮ CẢNH: "ở một mình"/"sống một mình" → bedrooms_min=1;
    "vợ chồng"/"2 người" → bedrooms_min=2; "gia đình"/"có con" → bedrooms_min=3.
@@ -103,6 +119,21 @@ Ví dụ 9: Context={}
   User: "tìm chỗ ở gần trường, có mạng, giá mềm"
   Output: {"amenities": {"near_school": true, "wifi": true}, "sort": "price_asc"}
   (Không tự suy ra price_max vì "giá mềm" không có số cụ thể)
+
+Ví dụ 10: Context={}
+  User: "có chỗ rèn luyện sức khỏe và bơi lội không"
+  Output: {"amenities": {"gym": true, "swimming_pool": true}}
+  (CHỈ gym + swimming_pool. KHÔNG thêm bất kỳ amenity nào khác)
+
+Ví dụ 11: Context={}
+  User: "an ninh tốt, sóng sánh đầy đủ"
+  Output: {"amenities": {"security": true, "wifi": true}}
+  (sóng = wifi/internet. KHÔNG thêm cctv hay amenity khác)
+
+Ví dụ 12: Context={}
+  User: "gần nơi chữa bệnh và dân trí cao"
+  Output: {"amenities": {"near_hospital": true, "security": true}}
+  (chữa bệnh = near_hospital, dân trí cao = security. KHÔNG thêm amenity khác)
 
 Chỉ trả về các key có thông tin mới. Không trả null cho các key không thay đổi."""
 

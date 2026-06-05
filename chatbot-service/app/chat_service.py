@@ -32,6 +32,20 @@ from app.session_repo import add_message, get_or_create_session, load_context_fi
 logger = logging.getLogger(__name__)
 
 
+_AMENITY_VI: dict[str, str] = {
+    "swimming_pool": "hồ bơi",
+    "parking": "bãi xe",
+    "gym": "phòng gym",
+    "near_school": "gần trường học",
+    "security": "an ninh",
+    "near_hospital": "gần bệnh viện",
+    "near_market": "gần chợ/siêu thị",
+    "wifi": "wifi",
+    "elevator": "thang máy",
+    "cctv": "camera giám sát",
+}
+
+
 def _location_label(f: SearchFilters) -> str:
     if f.ward_id:
         return "khu vực đã chọn"
@@ -40,6 +54,71 @@ def _location_label(f: SearchFilters) -> str:
     if f.keyword:
         return f"\"{f.keyword}\""
     return ""
+
+
+def _describe_filters(db, f: SearchFilters) -> str:
+    """Mô tả bộ lọc bằng ngôn ngữ tự nhiên để giải thích cho user."""
+    parts: list[str] = []
+
+    # Loại BĐS
+    if f.property_types:
+        parts.append(", ".join(f.property_types))
+    else:
+        parts.append("bất động sản")
+
+    # Phòng ngủ
+    if f.bedrooms_min:
+        parts.append(f"{f.bedrooms_min} phòng ngủ")
+
+    # Diện tích
+    if f.size_min and f.size_max:
+        parts.append(f"diện tích {f.size_min}–{f.size_max}m²")
+    elif f.size_min:
+        parts.append(f"từ {f.size_min}m²")
+
+    # Khu vực
+    ward_name = None
+    city_name = None
+    if f.ward_id:
+        row = db.execute(text("SELECT wname FROM wards WHERE wid = :wid LIMIT 1"), {"wid": int(f.ward_id)}).first()
+        if row:
+            ward_name = str(row[0] or "")
+    if f.city_id:
+        row = db.execute(text("SELECT cname FROM city WHERE cid = :cid LIMIT 1"), {"cid": int(f.city_id)}).first()
+        if row:
+            city_name = str(row[0] or "")
+    loc = ward_name or f.ward_name_hint or city_name or f.keyword
+    if loc:
+        parts.append(f"tại {loc}")
+
+    # Giá
+    if f.price_min_million and f.price_max_million:
+        parts.append(f"giá {int(f.price_min_million)}–{int(f.price_max_million)} triệu/tháng")
+    elif f.price_max_million:
+        parts.append(f"dưới {int(f.price_max_million)} triệu/tháng")
+    elif f.price_min_million:
+        parts.append(f"từ {int(f.price_min_million)} triệu/tháng")
+
+    # Tiện ích
+    if f.amenities:
+        am_dict = model_to_dict(f.amenities, exclude_none=True)
+        active = [_AMENITY_VI.get(k, k) for k, v in am_dict.items() if v is True]
+        if active:
+            parts.append("có " + ", ".join(active))
+
+    # Extended attributes
+    _WS_VI = {"nuoc_ngam": "nước ngầm", "bon_chua": "bồn chứa/nước máy"}
+    _IL_VI = {"day_du": "nội thất đầy đủ", "co_ban": "nội thất cơ bản", "khong": "không nội thất"}
+    if f.water_source:
+        parts.append(_WS_VI.get(f.water_source, f.water_source))
+    if f.interior_level:
+        parts.append(_IL_VI.get(f.interior_level, f.interior_level))
+    if f.frontage_m is not None:
+        parts.append(f"mặt tiền ≥{f.frontage_m}m")
+    if f.access_road_m is not None:
+        parts.append(f"đường vào ≥{f.access_road_m}m")
+
+    return " ".join(parts)
 
 
 def _compute_missing_geo(f: SearchFilters) -> list[str]:
@@ -283,15 +362,22 @@ def handle_chat_message(
 
     if is_smalltalk(raw):
         reply = (
-            "Chào bạn! Mình là trợ lý tìm kiếm bất động sản. "
-            "Bạn có thể nói theo kiểu: \"Căn hộ 2 phòng ngủ Phường Bình Thạnh dưới 20 triệu có hồ bơi\"."
+            "Chào bạn! 👋 Mình là trợ lý tìm kiếm bất động sản.\n"
+            "Bạn cứ mô tả nhu cầu thoải mái, ví dụ:\n"
+            "• \"Tìm căn hộ 2 phòng ngủ ở Thái Nguyên dưới 10 triệu\"\n"
+            "• \"Nhà có wifi và bãi xe gần trường\"\n"
+            "Mình sẽ giúp bạn tìm ngay! 😊"
         )
         return ChatMessageResponse(
             reply_text=reply,
             intent="smalltalk",
             filters=SearchFilters(stype="rent"),
             missing_slots=[],
-            follow_up_questions=[],
+            follow_up_questions=[
+                "Căn hộ 2 phòng ngủ dưới 15 triệu",
+                "Nhà có bãi xe và wifi",
+                "Studio giá rẻ",
+            ],
             result_count=0,
             properties=[],
             session_id=public_session_id,
@@ -321,7 +407,11 @@ def handle_chat_message(
                 llm_payload.pop("ward_id", None)
 
             if _has_location_signal(raw):
-                prev_filters = model_with_update(prev_filters, city_id=None, ward_id=None)
+                prev_filters = model_with_update(
+                    prev_filters,
+                    city_id=None, ward_id=None,
+                    ward_name_hint=None, keyword=None,
+                )
 
             if _has_ward_override_signal(raw) or _has_ward_override_signal(normalized):
                 _old_ward_for_exclude = prev_filters.ward_id
@@ -529,67 +619,58 @@ def handle_chat_message(
                 fb_level,
             )
 
-            follow_ups: list[str] = []
-            if total == 0:
-                hints: list[str] = []
-                am_dict = model_to_dict(merged.amenities) if merged.amenities else {}
-                active_am = [k for k, v in am_dict.items() if v is True]
-                if active_am:
-                    hints.append("bỏ bớt tiêu chí tiện ích")
-                    follow_ups.append("Tìm không cần " + ", ".join(active_am[:2]))
-                if merged.ward_id or merged.ward_name_hint:
-                    hints.append("mở rộng khu vực")
-                    follow_ups.append("Tìm không giới hạn phường/xã cụ thể")
-                if merged.property_types:
-                    hints.append("thử loại BĐS khác")
-                    follow_ups.append("Thử tìm " + ("Chung cư" if "Nhà" in merged.property_types else "Nhà"))
-                if merged.bedrooms_min and merged.bedrooms_min > 1:
-                    hints.append(f"giảm số phòng ngủ xuống {merged.bedrooms_min - 1}")
-                    follow_ups.append(f"Tìm {merged.bedrooms_min - 1} phòng ngủ")
-                if merged.price_max_million:
-                    hints.append("nới thêm ngân sách")
-                    follow_ups.append(f"Tìm dưới {int(merged.price_max_million * 1.3)} triệu")
-                else:
-                    hints.append("cho biết ngân sách tối đa")
-                    follow_ups.append("Ngân sách tối đa của bạn khoảng bao nhiêu triệu mỗi tháng?")
 
-                if merged.city_id and not (merged.ward_id or merged.ward_name_hint):
-                    hints.append("đổi tỉnh/thành khác")
-                    follow_ups.append("Tìm trên toàn quốc không giới hạn tỉnh/thành")
-                hint_str = "; ".join(hints) if hints else "đổi khu vực hoặc bỏ bớt tiêu chí"
-                reply = f"Hiện chưa tìm thấy tin phù hợp. Bạn thử {hint_str} nhé."
+            desc = _describe_filters(db, merged)
+
+            if total == 0:
+                am_dict = model_to_dict(merged.amenities) if merged.amenities else {}
+                active_am = [_AMENITY_VI.get(k, k) for k, v in am_dict.items() if v is True]
+
+                reply = f"Mình đã tìm {desc} nhưng hiện chưa có tin nào phù hợp."
+                suggestions: list[str] = []
+
+                if active_am:
+                    suggestions.append(f"bỏ bớt yêu cầu về {', '.join(active_am[:2])}")
+                if merged.ward_id or merged.ward_name_hint:
+                    suggestions.append("thử mở rộng sang khu vực lân cận")
+                if merged.property_types:
+                    alt_type = "Chung cư" if "Nhà" in merged.property_types else "Nhà"
+                    suggestions.append(f"xem thêm loại {alt_type}")
+                if merged.bedrooms_min and merged.bedrooms_min > 1:
+                    suggestions.append(f"giảm xuống {merged.bedrooms_min - 1} phòng ngủ")
+                if merged.price_max_million:
+                    new_budget = int(merged.price_max_million * 1.3)
+                    suggestions.append(f"nới ngân sách lên khoảng {new_budget} triệu")
+
+                if suggestions:
+                    reply += " Bạn thử " + "; ".join(suggestions) + " xem sao nhé!"
+                else:
+                    reply += " Bạn thử thay đổi khu vực hoặc tiêu chí tìm kiếm nhé!"
             else:
                 if comparison_mode and cards:
                     card = cards[0]
                     label = "rẻ nhất" if comparison_mode == "cheapest" else "đắt nhất"
                     reply = (
-                        f"Căn {label} trong danh sách vừa rồi là: "
-                        f"{card.title} - {card.price_raw}."
+                        f"Trong danh sách vừa rồi, căn {label} là \"{card.title}\" "
+                        f"với giá {card.price_raw} triệu/tháng. Bạn muốn xem thêm không?"
                     )
-                    follow_ups.append("Xem các căn tương tự")
-                    follow_ups.append("Mở rộng khu vực tìm kiếm")
                 else:
-                    loc = _location_label(merged)
-                    reply = f"Tìm thấy {total} tin" + (f" tại {loc}" if loc else "") + "."
-                    if fb_note:
-                        reply += " " + fb_note
+                    if total == 1:
+                        reply = f"Mình tìm được 1 tin {desc}. Bạn xem thử nhé!"
+                    elif total <= 5:
+                        reply = f"Có {total} tin {desc}. Mình đã chọn những tin phù hợp nhất cho bạn 👇"
+                    else:
+                        reply = f"Tuyệt, có tới {total} tin {desc}! Dưới đây là những tin nổi bật nhất 👇"
+
+                    if fb_level > 0 and fb_note:
+                        reply += f"\n⚠️ {fb_note}"
                     if merged.sort == "price_asc" and merged.price_max_million is None:
-                        reply += " Mình đã ưu tiên các tin có giá thấp trước."
-                    if total <= 3:
-                        follow_ups.append("Mở rộng khu vực tìm kiếm")
-                        follow_ups.append("Thử loại BĐS khác")
-                        if merged.amenities and any(
-                            v for v in model_to_dict(merged.amenities).values() if v is True
-                        ):
-                            follow_ups.append("Bỏ bớt tiêu chí tiện ích để có thêm kết quả")
-                    if merged.price_max_million is None:
-                        budget_q = "Ngân sách tối đa của bạn khoảng bao nhiêu triệu mỗi tháng?"
-                        if budget_q not in follow_ups:
-                            follow_ups.append(budget_q)
+                        reply += "\n📊 Mình đã sắp xếp giá từ thấp đến cao cho bạn."
 
             # Prepend city-switch UX note
             if _city_switched_note:
-                reply = _city_switched_note + " " + reply
+                reply = _city_switched_note + "\n" + reply
+
 
             add_message(db, sid_pk, "user", raw)
             add_message(
@@ -627,7 +708,7 @@ def handle_chat_message(
                 intent="property_search",
                 filters=merged,
                 missing_slots=[],
-                follow_up_questions=follow_ups,
+                follow_up_questions=[],
                 result_count=total,
                 fallback_level=fb_level,
                 fallback_note=fb_note,
